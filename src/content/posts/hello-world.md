@@ -4,7 +4,7 @@ author: Sanveer Osahan
 pubDatetime: 2026-06-05T12:00:00.000+05:30
 slug: hello-world
 featured: false
-draft: true
+draft: false
 tags:
   - meta
 description: "First post — why this site exists."
