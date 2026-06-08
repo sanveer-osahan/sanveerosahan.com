@@ -1,11 +1,40 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "public/pagefind"],
   "compilerOptions": {
+    "baseUrl": ".",
+    "lib": [
+      "es2022",
+      "dom",
+      "dom.iterable"
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@/astro-paper.config": ["./astro-paper.config"]
+      "@/assets/*": [
+        "src/assets/*"
+      ],
+      "@/components/*": [
+        "src/components/*"
+      ],
+      "@/data/*": [
+        "src/data/*"
+      ],
+      "@/layouts/*": [
+        "src/layouts/*"
+      ],
+      "@/utils/*": [
+        "src/utils/*"
+      ],
+      "@/types": [
+        "src/types.ts"
+      ],
+      "@/site-config": [
+        "src/site.config.ts"
+      ]
     }
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "**/node_modules/*",
+    ".vscode",
+    "dist"
+  ]
 }

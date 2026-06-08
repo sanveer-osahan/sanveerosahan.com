@@ -1,141 +1,323 @@
 ---
-import { getCollection } from "astro:content";
-import { getRelativeLocaleUrl } from "astro:i18n";
-import IconRss from "@/assets/icons/IconRss.svg";
-import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
-import Layout from "@/layouts/Layout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
-import Socials from "@/components/Socials.astro";
-import Card from "@/components/Card.astro";
-import LinkButton from "@/components/LinkButton.astro";
-import { getSortedPosts } from "@/utils/getSortedPosts";
-import { useTranslations } from "@/i18n";
-import config from "@/config";
+import { getAllPosts, getPostSortDate, sortMDByDate } from "@/data/post";
+import PageLayout from "@/layouts/Base.astro";
+import { siteConfig } from "@/site-config";
+import { formatRailDate, formatStampDate } from "@/utils/date";
+import { absoluteUrl, withBase } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
 
-const { socials, posts: postsConfig } = config;
+const allPosts = await getAllPosts();
+const allPostsByDate = sortMDByDate(allPosts);
+const TIMELINE_LIMIT = 5;
+const timelinePosts = allPostsByDate.slice(0, TIMELINE_LIMIT);
+const featured = timelinePosts[0];
+const rest = timelinePosts.slice(1);
+const archiveCount = allPosts.length;
 
-const locale = Astro.currentLocale ?? config.site.lang;
-const t = useTranslations(locale);
-
-const posts = await getCollection("posts");
-const sortedPosts = getSortedPosts(posts);
-const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
-const homePath = getRelativeLocaleUrl(locale, "");
+const profile = siteConfig.profile;
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 ---
 
-<Layout>
-  <Header />
-  <main
-    id="main-content"
-    data-layout="index"
-    data-home-path={homePath}
-    class="app-layout"
-  >
-    <section id="hero" class="border-border border-b pt-8 pb-6">
-      <h1 class="my-4 inline-block text-4xl font-bold sm:my-8 sm:text-5xl">
-        Hi, I'm Sanveer 👋
-      </h1>
-      <a
-        target="_blank"
-        href={`${import.meta.env.BASE_URL.replace(/\/?$/, "/")}rss.xml`}
-        class="inline-block"
-        aria-label="RSS Feed"
-        title="RSS Feed"
-      >
-        <IconRss
-          width={20}
-          height={20}
-          class="stroke-accent scale-125 stroke-3 rtl:-rotate-90"
-        />
-        <span class="sr-only">RSS Feed</span>
-      </a>
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{
+				"@type": "ListItem",
+				position: 1,
+				name: "Home",
+				item: siteUrl("/"),
+			},
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "About",
+				item: siteUrl("/about"),
+			},
+			{
+				"@type": "ListItem",
+				position: 3,
+				name: "Posts",
+				item: siteUrl("/posts"),
+			},
+		],
+	}}
+/>
 
-      <p>
-        I'm a software engineer at Atlan. I write about software engineering,
-        systems, and things I learn along the way.
-      </p>
-      <p class="mt-2">
-        Read my
-        <LinkButton
-          class="hover:text-accent underline decoration-dashed underline-offset-4"
-          href={getRelativeLocaleUrl(locale, "posts")}
-        >
-          blog posts
-        </LinkButton> or learn more
-        <LinkButton
-          class="hover:text-accent underline decoration-dashed underline-offset-4"
-          href={getRelativeLocaleUrl(locale, "about")}
-        >
-          about me
-        </LinkButton>.
-      </p>
-      {
-        socials.length > 0 && (
-          <div class="mt-4 flex max-sm:flex-col sm:items-center">
-            <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">
-              {t.home.socialLinks}:
-            </div>
-            <Socials />
-          </div>
-        )
-      }
-    </section>
+<PageLayout meta={{ title: "Home", description: siteConfig.description }}>
+	<section class="hero">
+		<p>{siteConfig.description}</p>
+		<div class="socials">
+			{profile?.github && (
+				<>
+					<a href={profile.github} rel="noreferrer" target="_blank">GitHub</a>
+					<span class="sep">·</span>
+				</>
+			)}
+			{profile?.linkedin && (
+				<>
+					<a href={profile.linkedin} rel="noreferrer" target="_blank">LinkedIn</a>
+					<span class="sep">·</span>
+				</>
+			)}
+			{profile?.email && (
+				<>
+					<a href={`mailto:${profile.email}`}>Email</a>
+					<span class="sep">·</span>
+				</>
+			)}
+			<a href={withBase("/rss.xml")}>RSS</a>
+		</div>
+	</section>
 
-    {
-      featuredPosts.length > 0 && (
-        <section
-          id="featured"
-          class:list={[
-            "pt-12 pb-6",
-            { "border-border border-b": recentPosts.length > 0 },
-          ]}
-        >
-          <h2 class="text-2xl font-semibold tracking-wide">
-            {t.home.featured}
-          </h2>
-          <ul>
-            {featuredPosts.map(data => (
-              <Card variant="h3" {...data} />
-            ))}
-          </ul>
-        </section>
-      )
-    }
+	<section class="writing" aria-labelledby="writing-label">
+		<div class="section-label" id="writing-label">Writing</div>
+		<div class="timeline">
+			{
+				featured && (
+					<a
+						class="post featured"
+						data-astro-prefetch
+						href={withBase(`/posts/${featured.id}/`)}
+						style="--i: 0"
+					>
+						<div class="post-rail">
+							<time class="post-date" datetime={getPostSortDate(featured).toISOString()}>
+								{formatRailDate(getPostSortDate(featured))}
+							</time>
+							<span class="post-dot" aria-hidden="true" />
+						</div>
+						<div class="post-body">
+							<div class="post-stamp">Latest · {formatStampDate(getPostSortDate(featured))}</div>
+							<h2 class="post-title">{featured.data.title}</h2>
+							<p class="post-excerpt">{featured.data.description}</p>
+							{!!featured.data.tags?.length && (
+								<div class="post-meta">
+									{featured.data.tags.map((t, i) => (
+										<Fragment>
+											{i > 0 && <span class="dot">·</span>}
+											<span>{t}</span>
+										</Fragment>
+									))}
+								</div>
+							)}
+						</div>
+					</a>
+				)
+			}
 
-    {
-      recentPosts.length > 0 && (
-        <section id="recent-posts" class="pt-12 pb-6">
-          <h2 class="text-2xl font-semibold tracking-wide">
-            {t.home.recentPosts}
-          </h2>
-          <ul>
-            {recentPosts.slice(0, postsConfig.perIndex).map(data => (
-              <Card variant="h3" {...data} />
-            ))}
-          </ul>
-        </section>
-      )
-    }
+			{
+				rest.map((p, idx) => (
+					<a
+						class="post"
+						data-astro-prefetch
+						href={withBase(`/posts/${p.id}/`)}
+						style={`--i: ${idx + 1}`}
+					>
+						<div class="post-rail">
+							<time class="post-date" datetime={getPostSortDate(p).toISOString()}>
+								{formatRailDate(getPostSortDate(p))}
+							</time>
+							<span class="post-dot" aria-hidden="true" />
+						</div>
+						<div class="post-body">
+							<h3 class="post-title">{p.data.title}</h3>
+							<p class="post-preview">{p.data.description}</p>
+						</div>
+					</a>
+				))
+			}
 
-    <div class="my-8 text-center">
-      <LinkButton href={getRelativeLocaleUrl(locale, "posts")}>
-        {t.home.allPosts}
-        <IconArrowRight class="inline-block rtl:-rotate-180" />
-      </LinkButton>
-    </div>
-  </main>
-  <Footer />
-</Layout>
+			<div class="archive-link" style={`--i: ${rest.length + 1}`}>
+				<a data-astro-prefetch href={withBase("/posts/")}
+					>View all {archiveCount} posts →</a
+				>
+			</div>
+		</div>
+	</section>
 
-<script>
-  document.addEventListener("astro:page-load", () => {
-    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
-      ?.dataset;
-    const baseRoot = import.meta.env.BASE_URL.replace(/\/?$/, "/");
-    if (indexLayout?.layout) {
-      sessionStorage.setItem("backUrl", indexLayout.homePath ?? baseRoot);
-    }
-  });
-</script>
+</PageLayout>
+
+<style>
+	/* ---------- Hero ---------- */
+	.hero {
+		margin-bottom: 88px;
+	}
+	.hero p {
+		font-size: 19.5px;
+		line-height: 1.65;
+		color: hsl(var(--theme-text));
+		margin: 0 0 22px;
+		max-width: 60ch;
+		text-wrap: pretty;
+		white-space: pre-line;
+	}
+	.socials {
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+		color: hsl(var(--theme-text) / 0.72);
+		margin-top: 18px;
+	}
+	.socials a {
+		color: hsl(var(--theme-text-muted));
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.35);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 3px;
+		transition: color 0.2s ease, text-decoration-color 0.2s ease;
+	}
+	.socials a:hover {
+		color: hsl(var(--theme-accent));
+		text-decoration-color: hsl(var(--theme-accent));
+	}
+	.socials .sep {
+		color: var(--faint);
+		margin: 0 9px;
+	}
+
+	/* ---------- Writing timeline ---------- */
+	.writing {
+		margin-bottom: 96px;
+	}
+	/* ---------- Featured post ---------- */
+	.post.featured .post-body {
+		padding-bottom: 56px;
+	}
+	.post.featured .post-stamp {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-accent));
+		margin-bottom: 12px;
+	}
+	.post.featured .post-title {
+		font-size: 30px;
+		line-height: 1.14;
+		margin-bottom: 14px;
+		letter-spacing: -0.02em;
+	}
+	.post.featured .post-excerpt {
+		font-size: 18px;
+		line-height: 1.62;
+		color: hsl(var(--theme-text-muted));
+		margin: 0 0 16px;
+		max-width: 58ch;
+		word-wrap: break-word;
+		overflow-wrap: anywhere;
+	}
+	.post.featured .post-meta {
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: hsl(var(--theme-text) / 0.72);
+		font-variant-numeric: tabular-nums;
+		font-feature-settings: "tnum";
+	}
+	.post.featured .post-meta .dot {
+		color: var(--faint);
+		margin: 0 8px;
+	}
+	.post.featured .post-dot {
+		--rail-dot-size: 11px;
+		border-color: hsl(var(--theme-text-muted));
+	}
+	.post.featured:hover .post-dot {
+		background: hsl(var(--theme-accent));
+		border-color: hsl(var(--theme-accent));
+	}
+
+	.archive-link {
+		grid-column: 2;
+		margin-top: 8px;
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+		color: hsl(var(--theme-text) / 0.72);
+	}
+	.archive-link a {
+		display: inline-block;
+		padding: 6px 0;
+		color: hsl(var(--theme-text-muted));
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.35);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 3px;
+		transition: color 0.2s ease, text-decoration-color 0.2s ease;
+	}
+	.archive-link a:hover {
+		color: hsl(var(--theme-accent));
+		text-decoration-color: hsl(var(--theme-accent));
+	}
+
+	.work {
+		margin-bottom: 88px;
+	}
+
+	.socials a:focus-visible,
+	.archive-link a:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 3px;
+		border-radius: 3px;
+	}
+
+	@media (max-width: 720px) {
+		.hero {
+			margin-bottom: 64px;
+		}
+		.hero p {
+			font-size: 18px;
+		}
+		.post.featured .post-rail {
+			display: none;
+		}
+		.post.featured .post-body {
+			padding-bottom: 24px;
+			border-bottom: 1px solid var(--hairline);
+			margin-bottom: 4px;
+		}
+		.post.featured .post-title {
+			font-size: 22px;
+			line-height: 1.2;
+			letter-spacing: -0.015em;
+			margin-bottom: 10px;
+		}
+		.post.featured .post-excerpt {
+			font-size: 15.5px;
+			line-height: 1.55;
+			margin: 0 0 10px;
+		}
+		.post.featured .post-meta {
+			font-size: 11px;
+		}
+		.archive-link {
+			margin-top: 0;
+		}
+	}
+
+	@media (max-width: 420px) {
+		.hero {
+			margin-bottom: 48px;
+		}
+		.hero p {
+			font-size: 17px;
+		}
+		.socials {
+			font-size: 12.5px;
+		}
+		.socials .sep {
+			margin: 0 6px;
+		}
+		.writing {
+			margin-bottom: 64px;
+		}
+		.post.featured .post-title {
+			font-size: 17px;
+		}
+		.post.featured .post-excerpt {
+			font-size: 15px;
+		}
+		.work {
+			margin-bottom: 56px;
+		}
+	}
+</style>
