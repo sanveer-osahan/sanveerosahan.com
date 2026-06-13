@@ -45,3 +45,17 @@ hand-drawn diagram support), pnpm, deployed to Cloudflare Pages via GitHub Actio
 - Push to `main` → auto-deploy. No direct wrangler deploys from local.
 - This is a PERSONAL project — personal GitHub account (`sanveer-osahan`), not AtlanHQ.
 - `package.json` `pnpm.onlyBuiltDependencies` whitelists esbuild/sharp/biome so CI's frozen install builds them.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked as GitHub Issues via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default triage vocabulary (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context (one CONTEXT.md + docs/adr/ at the repo root). See `docs/agents/domain.md`.
