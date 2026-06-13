@@ -4,7 +4,8 @@ import { Image } from "astro:assets";
 
 import ShareButtons from "@/components/blog/ShareButtons.astro";
 import WebMentions from "@/components/blog/webmentions/index.astro";
-import { getAllPosts, getPostSortDate, sortMDByDate } from "@/data/post";
+import { type SectionCollection, getSection, sortByDate } from "@/data/content";
+import { type SectionMeta, sectionHref } from "@/data/sections";
 import { siteConfig } from "@/site-config";
 import { formatBylineDate, formatEyebrowDate } from "@/utils/date";
 import { absoluteUrl, withBase } from "@/utils/path";
@@ -13,27 +14,30 @@ import BaseLayout from "./Base.astro";
 import { Schema } from "astro-seo-schema";
 
 interface Props {
-	post: CollectionEntry<"post">;
+	post: CollectionEntry<SectionCollection>;
+	section: SectionMeta;
 }
 
-const { post } = Astro.props;
+const { post, section } = Astro.props;
 
-const sortedAll = sortMDByDate(await getAllPosts());
+const sortedAll = sortByDate(await getSection(section.collection));
 const idx = sortedAll.findIndex((p) => p.id === post.id);
 const newerPost = idx > 0 ? sortedAll[idx - 1] : undefined;
 const olderPost = idx >= 0 && idx < sortedAll.length - 1 ? sortedAll[idx + 1] : undefined;
 const {
-	data: { coverImage, description, ogImage, publishDate, title, updatedDate, tags, draft },
+	data: { description, ogImage, publishDate, title, updatedDate, tags, draft },
 	id: slug,
 } = post;
-const socialImage = ogImage ?? `/og-image/${slug}.png`;
+// coverImage only exists on the post and book collections.
+const coverImage = "coverImage" in post.data ? post.data.coverImage : undefined;
+const socialImage = ogImage ?? (section.hasOgImage ? `/og-image/${slug}.png` : undefined);
 const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString();
 const { remarkPluginFrontmatter } = await render(post);
 
 const authorName = siteConfig.profile?.name ?? siteConfig.author;
 const comments = siteConfig.comments;
-const postUrl = absoluteUrl(`/posts/${slug}/`, Astro.site);
-const socialImageAbsolute = absoluteUrl(socialImage, Astro.site);
+const postUrl = absoluteUrl(sectionHref(section.collection, slug), Astro.site);
+const socialImageAbsolute = absoluteUrl(socialImage ?? "/social-card.png", Astro.site);
 
 // "Posts · Month YYYY"
 const eyebrowDate = formatEyebrowDate(publishDate);
@@ -77,7 +81,7 @@ const giscusThemes = import.meta.env.PROD
 		<div class="post-main" data-pagefind-body>
 			<div id="blog-hero" class="post-header">
 				<div class="post-eyebrow">
-					Posts <span class="sep">·</span> {eyebrowDate}
+					{section.label} <span class="sep">·</span> {eyebrowDate}
 				</div>
 				{draft && <span class="draft-flag">(Draft)</span>}
 				<h1 class="post-title">{title}</h1>
@@ -122,6 +126,9 @@ const giscusThemes = import.meta.env.PROD
 				<hr class="rule" />
 			)}
 
+			{/* Section-specific lead — book Amazon link, guide prerequisites, video embed, etc. */}
+			<slot name="before-content" />
+
 			<article class="post-article">
 				<slot />
 			</article>
@@ -135,13 +142,13 @@ const giscusThemes = import.meta.env.PROD
 			{(olderPost || newerPost) && (
 				<nav class="post-pager" aria-label="More posts">
 					{olderPost && (
-						<a class="pager-link prev" data-astro-prefetch href={withBase(`/posts/${olderPost.id}/`)}>
+						<a class="pager-link prev" data-astro-prefetch href={withBase(sectionHref(section.collection, olderPost.id))}>
 							<span class="pager-eyebrow">Older</span>
 							<span class="pager-title">{olderPost.data.title}</span>
 						</a>
 					)}
 					{newerPost && (
-						<a class="pager-link next" data-astro-prefetch href={withBase(`/posts/${newerPost.id}/`)}>
+						<a class="pager-link next" data-astro-prefetch href={withBase(sectionHref(section.collection, newerPost.id))}>
 							<span class="pager-eyebrow">Newer</span>
 							<span class="pager-title">{newerPost.data.title}</span>
 						</a>

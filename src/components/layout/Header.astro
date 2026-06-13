@@ -16,8 +16,14 @@ const isActive = (path: string) => {
 
 const navIcons: Record<string, string> = {
 	"/": '<path d="M2.5 6.5 8 2l5.5 4.5V13a1 1 0 0 1-1 1h-2.5v-4h-4v4H3.5a1 1 0 0 1-1-1Z"/>',
-	"/posts/":
+	"/books/":
+		'<path d="M3 3a1 1 0 0 1 1-1h8v11H4a1 1 0 0 0-1 1Z"/><path d="M3 13a1 1 0 0 1 1-1h8"/>',
+	"/blog/":
 		'<path d="M3 2.5h7l3 3V13a.5.5 0 0 1-.5.5h-9.5a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Z"/><path d="M10 2.5V5.5h3"/><path d="M5.5 8.5h5"/><path d="M5.5 11h3.5"/>',
+	"/guides/":
+		'<path d="M5.5 4h7"/><path d="M5.5 8h7"/><path d="M5.5 12h7"/><path d="M3 4h.01"/><path d="M3 8h.01"/><path d="M3 12h.01"/>',
+	"/videos/":
+		'<rect x="2.5" y="3.5" width="11" height="9" rx="1.5"/><path d="M7 6.5l3 1.5-3 1.5Z"/>',
 	"/about/":
 		'<circle cx="8" cy="6" r="2.5"/><path d="M3 13c.6-2.4 2.6-3.5 5-3.5s4.4 1.1 5 3.5"/>',
 };

@@ -1,0 +1,65 @@
+---
+import { getSection, getSortDate, sortByDate } from "@/data/content";
+import { SECTIONS, sectionHref } from "@/data/sections";
+import PageLayout from "@/layouts/Base.astro";
+import { formatRailDate } from "@/utils/date";
+import { withBase } from "@/utils/path";
+
+const posts = sortByDate(await getSection("post"));
+
+const meta = {
+	title: SECTIONS.post.title,
+	description: "Writing — notes, essays, and the occasional sloppy diagram.",
+};
+---
+
+<PageLayout meta={meta}>
+	<section class="writing" aria-labelledby="writing-label">
+		<div class="section-label" id="writing-label">
+			{SECTIONS.post.label} · {posts.length} {posts.length === 1 ? "post" : "posts"}
+		</div>
+		{
+			posts.length === 0 ? (
+				<p class="empty">Nothing here yet.</p>
+			) : (
+				<div class="timeline">
+					{posts.map((p, idx) => (
+						<a
+							class="post"
+							data-astro-prefetch
+							href={withBase(sectionHref("post", p.id))}
+							style={`--i: ${idx}`}
+						>
+							<div class="post-rail">
+								<time class="post-date" datetime={getSortDate(p).toISOString()}>
+									{formatRailDate(getSortDate(p))}
+								</time>
+								<span class="post-dot" aria-hidden="true" />
+							</div>
+							<div class="post-body">
+								<h2 class="post-title">{p.data.title}</h2>
+								<p class="post-preview">{p.data.description}</p>
+							</div>
+						</a>
+					))}
+				</div>
+			)
+		}
+	</section>
+</PageLayout>
+
+<style>
+	.writing {
+		margin-bottom: 96px;
+	}
+	.empty {
+		font-family: var(--font-serif);
+		font-style: italic;
+		color: hsl(var(--theme-text-muted));
+	}
+	@media (max-width: 420px) {
+		.writing {
+			margin-bottom: 64px;
+		}
+	}
+</style>

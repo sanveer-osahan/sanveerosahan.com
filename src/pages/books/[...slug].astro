@@ -1,0 +1,72 @@
+---
+import { getSection } from "@/data/content";
+import { SECTIONS } from "@/data/sections";
+import BlogPost from "@/layouts/BlogPost.astro";
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { render } from "astro:content";
+
+export const getStaticPaths = (async () => {
+	const books = await getSection("book");
+	return books.map((entry) => ({
+		params: { slug: entry.id },
+		props: { entry },
+	}));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<BlogPost post={entry} section={SECTIONS.book}>
+	<div slot="before-content" class="book-meta">
+		<p class="book-by">by {entry.data.author}</p>
+		<a
+			class="book-amazon"
+			href={entry.data.amazonUrl}
+			rel="noreferrer nofollow"
+			target="_blank"
+		>
+			View on Amazon →
+		</a>
+	</div>
+	<Content />
+</BlogPost>
+
+<style>
+	.book-meta {
+		max-width: var(--reading-width);
+		margin: 0 0 36px;
+		padding: 0 0 24px;
+		border-bottom: 1px solid var(--hairline);
+	}
+	.book-by {
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: 16.5px;
+		color: hsl(var(--theme-text-muted));
+		margin: 0 0 12px;
+	}
+	.book-amazon {
+		font-family: var(--font-mono);
+		font-size: 12px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text-muted));
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.35);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 3px;
+		transition: color 0.2s ease, text-decoration-color 0.2s ease;
+	}
+	.book-amazon:hover {
+		color: hsl(var(--theme-accent));
+		text-decoration-color: hsl(var(--theme-accent));
+	}
+	.book-amazon:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 3px;
+		border-radius: 3px;
+	}
+</style>

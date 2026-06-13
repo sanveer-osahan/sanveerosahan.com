@@ -1,0 +1,152 @@
+---
+import { getSection, sortByDate } from "@/data/content";
+import { SECTIONS, sectionHref } from "@/data/sections";
+import PageLayout from "@/layouts/Base.astro";
+import { withBase } from "@/utils/path";
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+
+const books = sortByDate(await getSection("book"));
+
+// Group by tag — a book appears under each of its tags; untagged books fall under "other".
+const groups = new Map<string, CollectionEntry<"book">[]>();
+for (const book of books) {
+	const tags = book.data.tags.length ? book.data.tags : ["other"];
+	for (const tag of tags) {
+		const list = groups.get(tag) ?? [];
+		list.push(book);
+		groups.set(tag, list);
+	}
+}
+const grouped = [...groups.keys()].sort().map((tag) => ({ tag, books: groups.get(tag) ?? [] }));
+
+const meta = {
+	title: SECTIONS.book.title,
+	description: "Books I've read and the takeaways worth keeping.",
+};
+---
+
+<PageLayout meta={meta}>
+	<section class="shelf" aria-labelledby="shelf-label">
+		<div class="section-label" id="shelf-label">{SECTIONS.book.title}</div>
+		{
+			books.length === 0 ? (
+				<p class="empty">No book notes yet.</p>
+			) : (
+				grouped.map(({ tag, books }) => (
+					<div class="shelf-group">
+						<h2 class="shelf-tag">{tag}</h2>
+						<ul class="grid">
+							{books.map((book) => (
+								<li class="card">
+									<a data-astro-prefetch href={withBase(sectionHref("book", book.id))}>
+										{book.data.coverImage ? (
+											<Image
+												class="cover"
+												src={book.data.coverImage.src}
+												alt={book.data.coverImage.alt}
+												widths={[160, 320]}
+												sizes="160px"
+											/>
+										) : (
+											<span class="cover cover--placeholder">{book.data.title}</span>
+										)}
+										<span class="title">{book.data.title}</span>
+										<span class="author">{book.data.author}</span>
+									</a>
+								</li>
+							))}
+						</ul>
+					</div>
+				))
+			)
+		}
+	</section>
+</PageLayout>
+
+<style>
+	.shelf {
+		margin-bottom: 96px;
+	}
+	.empty {
+		font-family: var(--font-serif);
+		font-style: italic;
+		color: hsl(var(--theme-text-muted));
+	}
+	.shelf-group {
+		margin-bottom: 48px;
+	}
+	.shelf-tag {
+		font-family: var(--font-hand);
+		font-weight: 700;
+		font-size: 26px;
+		color: hsl(var(--theme-accent));
+		margin: 0 0 20px;
+		text-transform: lowercase;
+	}
+	.grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+		gap: 28px 24px;
+	}
+	.card a {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.cover {
+		display: block;
+		width: 100%;
+		aspect-ratio: 2 / 3;
+		object-fit: cover;
+		border: 1px solid var(--hairline);
+		border-radius: 4px;
+		background: var(--paper);
+		transition: border-color 0.2s ease, transform 0.2s ease;
+	}
+	.cover--placeholder {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		padding: 14px;
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: 15px;
+		line-height: 1.35;
+		color: hsl(var(--theme-text-muted));
+	}
+	.card a:hover .cover {
+		border-color: hsl(var(--theme-accent));
+		transform: translateY(-2px);
+	}
+	.title {
+		font-family: var(--font-serif);
+		font-size: 15.5px;
+		line-height: 1.3;
+		color: hsl(var(--theme-text));
+		transition: color 0.2s ease;
+	}
+	.card a:hover .title {
+		color: hsl(var(--theme-accent));
+	}
+	.author {
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+	.card a:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 3px;
+		border-radius: 3px;
+	}
+	@media (max-width: 420px) {
+		.grid {
+			grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+			gap: 22px 18px;
+		}
+	}
+</style>

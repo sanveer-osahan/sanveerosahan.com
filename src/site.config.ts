@@ -12,7 +12,7 @@ export const siteConfig: SiteConfig = {
 		},
 	},
 	description:
-		"Notes and key takeaways from the books I read — short summaries, the ideas worth keeping, and the occasional sloppy diagram.",
+		"Book notes, blog posts, how-to guides, and videos by Sanveer Osahan — the ideas worth keeping, and the occasional sloppy diagram.",
 	lang: "en-US",
 	ogLocale: "en_US",
 	sortPostsByUpdatedDate: false,
@@ -45,8 +45,20 @@ export const menuLinks: { path: string; title: string }[] = [
 		title: "Home",
 	},
 	{
-		path: "/posts/",
-		title: "Posts",
+		path: "/books/",
+		title: "Books",
+	},
+	{
+		path: "/blog/",
+		title: "Blog",
+	},
+	{
+		path: "/guides/",
+		title: "Guides",
+	},
+	{
+		path: "/videos/",
+		title: "Videos",
 	},
 	{
 		path: "/about/",

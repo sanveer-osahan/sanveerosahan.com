@@ -76,7 +76,7 @@ export async function GET(context: APIContext) {
 
 	const svg = await satori(
 		markup({
-			eyebrow: `Posts${SEP}${formatEyebrowDate(date)}`,
+			eyebrow: `Blog${SEP}${formatEyebrowDate(date)}`,
 			title,
 			byline: bylineParts.join(SEP),
 			tagsLine: tags.join(SEP),

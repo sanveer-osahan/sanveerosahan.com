@@ -1,0 +1,76 @@
+---
+import { getSection, getSortDate, sortByDate } from "@/data/content";
+import { SECTIONS, sectionHref } from "@/data/sections";
+import PageLayout from "@/layouts/Base.astro";
+import { formatRailDate } from "@/utils/date";
+import { withBase } from "@/utils/path";
+
+const guides = sortByDate(await getSection("guide"));
+
+const meta = {
+	title: SECTIONS.guide.title,
+	description: "Step-by-step guides for things I've figured out and want to make repeatable.",
+};
+---
+
+<PageLayout meta={meta}>
+	<section class="writing" aria-labelledby="guides-label">
+		<div class="section-label" id="guides-label">
+			{SECTIONS.guide.label} · {guides.length} {guides.length === 1 ? "guide" : "guides"}
+		</div>
+		{
+			guides.length === 0 ? (
+				<p class="empty">No guides yet.</p>
+			) : (
+				<div class="timeline">
+					{guides.map((g, idx) => (
+						<a
+							class="post"
+							data-astro-prefetch
+							href={withBase(sectionHref("guide", g.id))}
+							style={`--i: ${idx}`}
+						>
+							<div class="post-rail">
+								<time class="post-date" datetime={getSortDate(g).toISOString()}>
+									{formatRailDate(getSortDate(g))}
+								</time>
+								<span class="post-dot" aria-hidden="true" />
+							</div>
+							<div class="post-body">
+								<h2 class="post-title">{g.data.title}</h2>
+								<p class="post-preview">{g.data.description}</p>
+								{g.data.estimatedTime && (
+									<p class="guide-time">Estimated time · {g.data.estimatedTime}</p>
+								)}
+							</div>
+						</a>
+					))}
+				</div>
+			)
+		}
+	</section>
+</PageLayout>
+
+<style>
+	.writing {
+		margin-bottom: 96px;
+	}
+	.empty {
+		font-family: var(--font-serif);
+		font-style: italic;
+		color: hsl(var(--theme-text-muted));
+	}
+	.guide-time {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.6);
+		margin: 8px 0 0;
+	}
+	@media (max-width: 420px) {
+		.writing {
+			margin-bottom: 64px;
+		}
+	}
+</style>

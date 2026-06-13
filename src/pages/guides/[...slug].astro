@@ -1,0 +1,80 @@
+---
+import { getSection } from "@/data/content";
+import { SECTIONS } from "@/data/sections";
+import BlogPost from "@/layouts/BlogPost.astro";
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { render } from "astro:content";
+
+export const getStaticPaths = (async () => {
+	const guides = await getSection("guide");
+	return guides.map((entry) => ({
+		params: { slug: entry.id },
+		props: { entry },
+	}));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { prerequisites, estimatedTime } = entry.data;
+const hasMeta = prerequisites.length > 0 || Boolean(estimatedTime);
+---
+
+<BlogPost post={entry} section={SECTIONS.guide}>
+	{
+		hasMeta && (
+			<div slot="before-content" class="guide-meta">
+				{estimatedTime && <p class="guide-time">Estimated time · {estimatedTime}</p>}
+				{prerequisites.length > 0 && (
+					<div class="guide-prereqs">
+						<h2 class="guide-prereqs-label">Prerequisites</h2>
+						<ul>
+							{prerequisites.map((p) => (
+								<li>{p}</li>
+							))}
+						</ul>
+					</div>
+				)}
+			</div>
+		)
+	}
+	<Content />
+</BlogPost>
+
+<style>
+	.guide-meta {
+		max-width: var(--reading-width);
+		margin: 0 0 36px;
+		padding: 18px 22px;
+		border: 1px solid var(--hairline);
+		border-radius: 4px;
+		background: var(--accent-soft);
+	}
+	.guide-time {
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-accent));
+		margin: 0 0 10px;
+	}
+	.guide-prereqs-label {
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.55);
+		margin: 0 0 8px;
+	}
+	.guide-prereqs ul {
+		margin: 0;
+		padding-left: 20px;
+	}
+	.guide-prereqs li {
+		font-family: var(--font-serif);
+		font-size: 16px;
+		line-height: 1.6;
+		color: hsl(var(--theme-text));
+	}
+</style>

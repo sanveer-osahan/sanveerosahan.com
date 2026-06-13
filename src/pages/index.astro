@@ -1,18 +1,30 @@
 ---
-import { getAllPosts, getPostSortDate, sortMDByDate } from "@/data/post";
+import { getSection, getSortDate, sortByDate } from "@/data/content";
+import { type SectionMeta, SECTIONS, sectionHref } from "@/data/sections";
 import PageLayout from "@/layouts/Base.astro";
 import { siteConfig } from "@/site-config";
-import { formatRailDate, formatStampDate } from "@/utils/date";
+import { formatRailDate } from "@/utils/date";
 import { absoluteUrl, withBase } from "@/utils/path";
 import { Schema } from "astro-seo-schema";
 
-const allPosts = await getAllPosts();
-const allPostsByDate = sortMDByDate(allPosts);
-const TIMELINE_LIMIT = 5;
-const timelinePosts = allPostsByDate.slice(0, TIMELINE_LIMIT);
-const featured = timelinePosts[0];
-const rest = timelinePosts.slice(1);
-const archiveCount = allPosts.length;
+const HOME_ITEM_LIMIT = 3;
+
+const [books, posts, guides, videos] = await Promise.all([
+	getSection("book"),
+	getSection("post"),
+	getSection("guide"),
+	getSection("video"),
+]);
+
+/** Minimal shape the hub cards need from any section entry. */
+type HomeItem = { id: string; data: { title: string; publishDate: Date; updatedDate?: Date } };
+
+const sections: { meta: SectionMeta; items: HomeItem[] }[] = [
+	{ meta: SECTIONS.book, items: sortByDate(books).slice(0, HOME_ITEM_LIMIT) },
+	{ meta: SECTIONS.post, items: sortByDate(posts).slice(0, HOME_ITEM_LIMIT) },
+	{ meta: SECTIONS.guide, items: sortByDate(guides).slice(0, HOME_ITEM_LIMIT) },
+	{ meta: SECTIONS.video, items: sortByDate(videos).slice(0, HOME_ITEM_LIMIT) },
+];
 
 const profile = siteConfig.profile;
 const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
@@ -21,27 +33,10 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 <Schema
 	item={{
 		"@context": "https://schema.org",
-		"@type": "BreadcrumbList",
-		itemListElement: [
-			{
-				"@type": "ListItem",
-				position: 1,
-				name: "Home",
-				item: siteUrl("/"),
-			},
-			{
-				"@type": "ListItem",
-				position: 2,
-				name: "About",
-				item: siteUrl("/about"),
-			},
-			{
-				"@type": "ListItem",
-				position: 3,
-				name: "Posts",
-				item: siteUrl("/posts"),
-			},
-		],
+		"@type": "WebSite",
+		name: siteConfig.title,
+		description: siteConfig.description,
+		url: siteUrl("/"),
 	}}
 />
 
@@ -71,78 +66,42 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 		</div>
 	</section>
 
-	<section class="writing" aria-labelledby="writing-label">
-		<div class="section-label" id="writing-label">Writing</div>
-		<div class="timeline">
-			{
-				featured && (
-					<a
-						class="post featured"
-						data-astro-prefetch
-						href={withBase(`/posts/${featured.id}/`)}
-						style="--i: 0"
-					>
-						<div class="post-rail">
-							<time class="post-date" datetime={getPostSortDate(featured).toISOString()}>
-								{formatRailDate(getPostSortDate(featured))}
-							</time>
-							<span class="post-dot" aria-hidden="true" />
-						</div>
-						<div class="post-body">
-							<div class="post-stamp">Latest · {formatStampDate(getPostSortDate(featured))}</div>
-							<h2 class="post-title">{featured.data.title}</h2>
-							<p class="post-excerpt">{featured.data.description}</p>
-							{!!featured.data.tags?.length && (
-								<div class="post-meta">
-									{featured.data.tags.map((t, i) => (
-										<Fragment>
-											{i > 0 && <span class="dot">·</span>}
-											<span>{t}</span>
-										</Fragment>
-									))}
-								</div>
-							)}
-						</div>
+	<div class="sections">
+		{
+			sections.map(({ meta, items }) => (
+				<section class="card" aria-labelledby={`sec-${meta.collection}`}>
+					<a class="card-head" data-astro-prefetch href={withBase(`${meta.basePath}/`)}>
+						<h2 class="card-title" id={`sec-${meta.collection}`}>
+							{meta.title}
+						</h2>
+						<span class="card-go">View all →</span>
 					</a>
-				)
-			}
-
-			{
-				rest.map((p, idx) => (
-					<a
-						class="post"
-						data-astro-prefetch
-						href={withBase(`/posts/${p.id}/`)}
-						style={`--i: ${idx + 1}`}
-					>
-						<div class="post-rail">
-							<time class="post-date" datetime={getPostSortDate(p).toISOString()}>
-								{formatRailDate(getPostSortDate(p))}
-							</time>
-							<span class="post-dot" aria-hidden="true" />
-						</div>
-						<div class="post-body">
-							<h3 class="post-title">{p.data.title}</h3>
-							<p class="post-preview">{p.data.description}</p>
-						</div>
-					</a>
-				))
-			}
-
-			<div class="archive-link" style={`--i: ${rest.length + 1}`}>
-				<a data-astro-prefetch href={withBase("/posts/")}
-					>View all {archiveCount} posts →</a
-				>
-			</div>
-		</div>
-	</section>
-
+					{items.length === 0 ? (
+						<p class="card-empty">Nothing here yet.</p>
+					) : (
+						<ul class="card-list">
+							{items.map((item) => (
+								<li>
+									<a data-astro-prefetch href={withBase(sectionHref(meta.collection, item.id))}>
+										<span class="item-title">{item.data.title}</span>
+										<time class="item-date" datetime={getSortDate(item).toISOString()}>
+											{formatRailDate(getSortDate(item))}
+										</time>
+									</a>
+								</li>
+							))}
+						</ul>
+					)}
+				</section>
+			))
+		}
+	</div>
 </PageLayout>
 
 <style>
 	/* ---------- Hero ---------- */
 	.hero {
-		margin-bottom: 88px;
+		margin-bottom: 72px;
 	}
 	.hero p {
 		font-size: 19.5px;
@@ -151,7 +110,6 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 		margin: 0 0 22px;
 		max-width: 60ch;
 		text-wrap: pretty;
-		white-space: pre-line;
 	}
 	.socials {
 		font-family: var(--font-sans);
@@ -176,85 +134,84 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 		margin: 0 9px;
 	}
 
-	/* ---------- Writing timeline ---------- */
-	.writing {
+	/* ---------- Section cards ---------- */
+	.sections {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 40px 48px;
 		margin-bottom: 96px;
 	}
-	/* ---------- Featured post ---------- */
-	.post.featured .post-body {
-		padding-bottom: 56px;
+	.card-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 12px;
+		padding-bottom: 12px;
+		margin-bottom: 14px;
+		border-bottom: 1px solid var(--hairline);
 	}
-	.post.featured .post-stamp {
+	.card-title {
+		font-family: var(--font-hand);
+		font-weight: 700;
+		font-size: 28px;
+		line-height: 1;
+		color: hsl(var(--theme-accent));
+		margin: 0;
+	}
+	.card-go {
 		font-family: var(--font-mono);
 		font-size: 11px;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.04em;
 		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.55);
+		transition: color 0.2s ease;
+		white-space: nowrap;
+	}
+	.card-head:hover .card-go {
 		color: hsl(var(--theme-accent));
-		margin-bottom: 12px;
 	}
-	.post.featured .post-title {
-		font-size: 30px;
-		line-height: 1.14;
-		margin-bottom: 14px;
-		letter-spacing: -0.02em;
+	.card-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
 	}
-	.post.featured .post-excerpt {
-		font-size: 18px;
-		line-height: 1.62;
-		color: hsl(var(--theme-text-muted));
-		margin: 0 0 16px;
-		max-width: 58ch;
-		word-wrap: break-word;
-		overflow-wrap: anywhere;
+	.card-list li {
+		margin-bottom: 10px;
 	}
-	.post.featured .post-meta {
+	.card-list a {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 14px;
+	}
+	.item-title {
+		font-family: var(--font-serif);
+		font-size: 16px;
+		line-height: 1.4;
+		color: hsl(var(--theme-text));
+		transition: color 0.2s ease;
+		text-wrap: pretty;
+	}
+	.card-list a:hover .item-title {
+		color: hsl(var(--theme-accent));
+	}
+	.item-date {
+		flex: none;
 		font-family: var(--font-mono);
-		font-size: 11.5px;
-		color: hsl(var(--theme-text) / 0.72);
+		font-size: 11px;
+		color: hsl(var(--theme-text) / 0.5);
 		font-variant-numeric: tabular-nums;
-		font-feature-settings: "tnum";
 	}
-	.post.featured .post-meta .dot {
-		color: var(--faint);
-		margin: 0 8px;
-	}
-	.post.featured .post-dot {
-		--rail-dot-size: 11px;
-		border-color: hsl(var(--theme-text-muted));
-	}
-	.post.featured:hover .post-dot {
-		background: hsl(var(--theme-accent));
-		border-color: hsl(var(--theme-accent));
-	}
-
-	.archive-link {
-		grid-column: 2;
-		margin-top: 8px;
-		font-family: var(--font-sans);
-		font-size: 13.5px;
-		color: hsl(var(--theme-text) / 0.72);
-	}
-	.archive-link a {
-		display: inline-block;
-		padding: 6px 0;
+	.card-empty {
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: 15.5px;
 		color: hsl(var(--theme-text-muted));
-		text-decoration: underline;
-		text-decoration-color: hsl(var(--theme-text) / 0.35);
-		text-decoration-thickness: 1px;
-		text-underline-offset: 3px;
-		transition: color 0.2s ease, text-decoration-color 0.2s ease;
+		margin: 0;
 	}
-	.archive-link a:hover {
-		color: hsl(var(--theme-accent));
-		text-decoration-color: hsl(var(--theme-accent));
-	}
-
-	.work {
-		margin-bottom: 88px;
-	}
-
-	.socials a:focus-visible,
-	.archive-link a:focus-visible {
+	.card-head:focus-visible,
+	.card-list a:focus-visible,
+	.socials a:focus-visible {
 		outline: 2px solid hsl(var(--theme-accent));
 		outline-offset: 3px;
 		border-radius: 3px;
@@ -262,62 +219,23 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 
 	@media (max-width: 720px) {
 		.hero {
-			margin-bottom: 64px;
+			margin-bottom: 56px;
 		}
 		.hero p {
 			font-size: 18px;
 		}
-		.post.featured .post-rail {
-			display: none;
-		}
-		.post.featured .post-body {
-			padding-bottom: 24px;
-			border-bottom: 1px solid var(--hairline);
-			margin-bottom: 4px;
-		}
-		.post.featured .post-title {
-			font-size: 22px;
-			line-height: 1.2;
-			letter-spacing: -0.015em;
-			margin-bottom: 10px;
-		}
-		.post.featured .post-excerpt {
-			font-size: 15.5px;
-			line-height: 1.55;
-			margin: 0 0 10px;
-		}
-		.post.featured .post-meta {
-			font-size: 11px;
-		}
-		.archive-link {
-			margin-top: 0;
+		.sections {
+			grid-template-columns: 1fr;
+			gap: 36px;
+			margin-bottom: 64px;
 		}
 	}
-
 	@media (max-width: 420px) {
 		.hero {
-			margin-bottom: 48px;
+			margin-bottom: 44px;
 		}
 		.hero p {
 			font-size: 17px;
-		}
-		.socials {
-			font-size: 12.5px;
-		}
-		.socials .sep {
-			margin: 0 6px;
-		}
-		.writing {
-			margin-bottom: 64px;
-		}
-		.post.featured .post-title {
-			font-size: 17px;
-		}
-		.post.featured .post-excerpt {
-			font-size: 15px;
-		}
-		.work {
-			margin-bottom: 56px;
 		}
 	}
 </style>

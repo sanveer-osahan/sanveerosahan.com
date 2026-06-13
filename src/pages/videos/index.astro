@@ -1,0 +1,65 @@
+---
+import { getSection, getSortDate, sortByDate } from "@/data/content";
+import { SECTIONS, sectionHref } from "@/data/sections";
+import PageLayout from "@/layouts/Base.astro";
+import { formatRailDate } from "@/utils/date";
+import { withBase } from "@/utils/path";
+
+const videos = sortByDate(await getSection("video"));
+
+const meta = {
+	title: SECTIONS.video.title,
+	description: "YouTube videos I've made, with the scripts and prep behind them.",
+};
+---
+
+<PageLayout meta={meta}>
+	<section class="writing" aria-labelledby="videos-label">
+		<div class="section-label" id="videos-label">
+			{SECTIONS.video.label} · {videos.length} {videos.length === 1 ? "video" : "videos"}
+		</div>
+		{
+			videos.length === 0 ? (
+				<p class="empty">No videos yet — coming soon.</p>
+			) : (
+				<div class="timeline">
+					{videos.map((v, idx) => (
+						<a
+							class="post"
+							data-astro-prefetch
+							href={withBase(sectionHref("video", v.id))}
+							style={`--i: ${idx}`}
+						>
+							<div class="post-rail">
+								<time class="post-date" datetime={getSortDate(v).toISOString()}>
+									{formatRailDate(getSortDate(v))}
+								</time>
+								<span class="post-dot" aria-hidden="true" />
+							</div>
+							<div class="post-body">
+								<h2 class="post-title">{v.data.title}</h2>
+								<p class="post-preview">{v.data.description}</p>
+							</div>
+						</a>
+					))}
+				</div>
+			)
+		}
+	</section>
+</PageLayout>
+
+<style>
+	.writing {
+		margin-bottom: 96px;
+	}
+	.empty {
+		font-family: var(--font-serif);
+		font-style: italic;
+		color: hsl(var(--theme-text-muted));
+	}
+	@media (max-width: 420px) {
+		.writing {
+			margin-bottom: 64px;
+		}
+	}
+</style>

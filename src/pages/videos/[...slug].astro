@@ -1,0 +1,139 @@
+---
+import { getSection } from "@/data/content";
+import { SECTIONS, relatedSectionToCollection, sectionHref } from "@/data/sections";
+import BlogPost from "@/layouts/BlogPost.astro";
+import { withBase } from "@/utils/path";
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { render } from "astro:content";
+
+export const getStaticPaths = (async () => {
+	const videos = await getSection("video");
+	return videos.map((entry) => ({
+		params: { slug: entry.id },
+		props: { entry },
+	}));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+/** Pull the video id from a watch, youtu.be, or embed URL. */
+function youtubeId(rawUrl: string): string | null {
+	try {
+		const url = new URL(rawUrl);
+		if (url.hostname === "youtu.be") return url.pathname.slice(1) || null;
+		const v = url.searchParams.get("v");
+		if (v) return v;
+		const parts = url.pathname.split("/").filter(Boolean);
+		const embedIdx = parts.indexOf("embed");
+		if (embedIdx >= 0) return parts[embedIdx + 1] ?? null;
+		return null;
+	} catch {
+		return null;
+	}
+}
+
+const videoId = youtubeId(entry.data.youtubeUrl);
+
+const rel = entry.data.relatedTo;
+const related = rel
+	? {
+			href: sectionHref(relatedSectionToCollection(rel.section), rel.slug),
+			label: SECTIONS[relatedSectionToCollection(rel.section)].label,
+		}
+	: null;
+---
+
+<BlogPost post={entry} section={SECTIONS.video}>
+	<div slot="before-content" class="video-lead">
+		{
+			videoId ? (
+				<div class="video-embed">
+					<iframe
+						src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+						title={entry.data.title}
+						loading="lazy"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+						allowfullscreen
+					/>
+				</div>
+			) : (
+				<a class="video-link" href={entry.data.youtubeUrl} rel="noreferrer" target="_blank">
+					Watch on YouTube →
+				</a>
+			)
+		}
+		{related && (
+			<a class="video-related" data-astro-prefetch href={withBase(related.href)}>
+				Based on this {related.label.replace(/s$/, "").toLowerCase()} →
+			</a>
+		)}
+		<p class="video-prep-label">Show notes &amp; prep</p>
+	</div>
+	<Content />
+</BlogPost>
+
+<style>
+	.video-lead {
+		max-width: var(--reading-width);
+		margin: 0 0 36px;
+	}
+	.video-embed {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		margin-bottom: 16px;
+		border: 1px solid var(--hairline);
+		border-radius: 4px;
+		overflow: hidden;
+		background: var(--paper);
+	}
+	.video-embed iframe {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		border: 0;
+	}
+	.video-link {
+		display: inline-block;
+		margin-bottom: 16px;
+		font-family: var(--font-mono);
+		font-size: 12px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-accent));
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	.video-related {
+		display: inline-block;
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: hsl(var(--theme-text-muted));
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.35);
+		text-underline-offset: 3px;
+		transition: color 0.2s ease;
+	}
+	.video-related:hover {
+		color: hsl(var(--theme-accent));
+	}
+	.video-prep-label {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.55);
+		margin: 18px 0 0;
+		padding-top: 18px;
+		border-top: 1px solid var(--hairline);
+	}
+	.video-related:focus-visible,
+	.video-link:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 3px;
+		border-radius: 3px;
+	}
+</style>
