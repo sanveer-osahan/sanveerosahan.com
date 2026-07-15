@@ -8,14 +8,8 @@
       "dom.iterable"
     ],
     "paths": {
-      "@/assets/*": [
-        "src/assets/*"
-      ],
       "@/components/*": [
         "src/components/*"
-      ],
-      "@/data/*": [
-        "src/data/*"
       ],
       "@/layouts/*": [
         "src/layouts/*"

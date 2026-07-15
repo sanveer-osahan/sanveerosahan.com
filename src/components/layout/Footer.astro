@@ -1,6 +1,5 @@
 ---
 import { siteConfig } from "@/site-config";
-import { withBase } from "@/utils/path";
 
 const year = new Date().getFullYear();
 ---
@@ -13,9 +12,6 @@ const year = new Date().getFullYear();
 				🚀 Powered by <a href="https://github.com/AnjayGoel/astro-sienna" rel="noopener">Astro Sienna</a>
 			</span>
 		)}
-	</div>
-	<div class="right">
-		<a href={withBase("/rss.xml")}>RSS</a>
 	</div>
 </footer>
 

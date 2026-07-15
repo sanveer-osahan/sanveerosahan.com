@@ -3,8 +3,6 @@
 @import "@fontsource-variable/newsreader/wght-italic.css";
 @import "@fontsource-variable/inter/wght.css";
 @import "@fontsource-variable/jetbrains-mono/wght.css";
-@import "katex/dist/katex.min.css";
-@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap");
 
 @tailwind base;
 @tailwind components;

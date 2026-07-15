@@ -96,54 +96,5 @@ const {
 				}
 			}
 		</style>
-
-		<script>
-			// Theme-aware Mermaid (hand-drawn). Loads only on pages with <pre class="mermaid">.
-			const blocks = Array.from(
-				document.querySelectorAll<HTMLElement>(".post-article pre.mermaid"),
-			);
-			if (blocks.length) {
-				const { default: mermaid } = await import("mermaid");
-				const sources = new WeakMap<HTMLElement, string>();
-				blocks.forEach((el) => sources.set(el, el.textContent ?? ""));
-
-				const cssVar = (n: string) =>
-					getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-				const hsl = (n: string) => `hsl(${cssVar(n)})`;
-
-				const render = async () => {
-					const ink = hsl("--theme-text");
-					const accent = hsl("--theme-accent");
-					const paper = cssVar("--paper") || hsl("--theme-bg");
-					mermaid.initialize({
-						startOnLoad: false,
-						look: "handDrawn",
-						theme: "base",
-						fontFamily: "Caveat, cursive",
-						themeVariables: {
-							background: paper,
-							primaryColor: paper,
-							primaryBorderColor: ink,
-							primaryTextColor: ink,
-							secondaryColor: paper,
-							tertiaryColor: paper,
-							lineColor: accent,
-							fontSize: "22px",
-						},
-					});
-					for (const el of blocks) {
-						el.textContent = sources.get(el) ?? "";
-						el.removeAttribute("data-processed");
-					}
-					await mermaid.run({ nodes: blocks });
-				};
-
-				await render();
-				// Re-render with new colors when the reader toggles light/dark.
-				document.addEventListener("theme-change", () => {
-					void render();
-				});
-			}
-		</script>
 	</body>
 </html>
