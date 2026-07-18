@@ -1,6 +1,5 @@
 <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
 	<span class="icon" aria-hidden="true"></span>
-	<span class="label"></span>
 </button>
 
 <style is:global>
@@ -31,20 +30,11 @@
 		display: inline-block;
 		width: 1em;
 		font-size: 13px;
-		margin-right: 6px;
 		text-align: center;
 		transform: translateY(-1px);
 	}
-	.theme-toggle .icon::before { content: "☾"; }
-	[data-theme="dark"] .theme-toggle .icon::before { content: "☀"; }
-
-	.theme-toggle .label {
-		display: inline-block;
-		min-width: 2.6em;
-		text-align: left;
-	}
-	.theme-toggle .label::before { content: "Dark"; }
-	[data-theme="dark"] .theme-toggle .label::before { content: "Light"; }
+	.theme-toggle .icon::before { content: "☀"; }
+	[data-theme="dark"] .theme-toggle .icon::before { content: "☾"; }
 </style>
 
 <script>
