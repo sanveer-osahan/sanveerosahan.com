@@ -1,0 +1,117 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import { siteConfig } from "@/site-config";
+import { withBase } from "@/utils/path";
+import { getPublishedPosts } from "@/utils/posts";
+
+const meta = {
+	description: `Posts by ${siteConfig.author}.`,
+	title: "Posts",
+};
+
+const posts = await getPublishedPosts();
+const dateFormat = new Intl.DateTimeFormat("en-US", {
+	year: "numeric",
+	month: "short",
+	day: "numeric",
+});
+---
+
+<PageLayout meta={meta}>
+	<section class="page">
+		<h1>Posts</h1>
+
+		{
+			posts.length === 0 ? (
+				<p class="empty">Nothing published yet.</p>
+			) : (
+				<ul class="post-list">
+					{posts.map((post) => (
+						<li class="post-item">
+							<a href={withBase(`/posts/${post.id}/`)} class="post-link">
+								<span class="post-title">
+									{post.data.draft && <span class="draft-badge">[Draft]</span>}
+									{post.data.title}
+								</span>
+								<time datetime={post.data.publishDate.toISOString()} class="post-date">
+									{dateFormat.format(post.data.publishDate)}
+								</time>
+							</a>
+							<p class="post-desc">{post.data.description}</p>
+						</li>
+					))}
+				</ul>
+			)
+		}
+	</section>
+</PageLayout>
+
+<style>
+	.page {
+		padding: 24px 0 80px;
+	}
+	.page h1 {
+		font-family: var(--font-serif);
+		font-weight: 500;
+		font-size: clamp(32px, 5vw, 44px);
+		letter-spacing: -0.02em;
+		line-height: 1.12;
+		color: hsl(var(--theme-text));
+		margin: 0 0 40px;
+	}
+	.empty {
+		color: hsl(var(--theme-text) / 0.6);
+		font-style: italic;
+	}
+	.post-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 36px;
+	}
+	.post-link {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 16px;
+	}
+	.post-title {
+		font-family: var(--font-serif);
+		font-size: 21px;
+		font-weight: 500;
+		letter-spacing: -0.01em;
+		color: hsl(var(--theme-text));
+	}
+	.post-link:hover .post-title {
+		color: hsl(var(--theme-accent));
+	}
+	.draft-badge {
+		font-family: var(--font-sans);
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: hsl(var(--theme-accent));
+		margin-right: 8px;
+		vertical-align: 2px;
+	}
+	.post-date {
+		flex: none;
+		font-family: var(--font-sans);
+		font-size: 13px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+	.post-desc {
+		margin: 8px 0 0;
+		font-size: 16.5px;
+		line-height: 1.55;
+		color: hsl(var(--theme-text) / 0.78);
+	}
+	@media (max-width: 720px) {
+		.post-link {
+			flex-direction: column;
+			gap: 4px;
+		}
+	}
+</style>

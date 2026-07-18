@@ -1,0 +1,103 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import { withBase } from "@/utils/path";
+import { getPublishedPosts } from "@/utils/posts";
+import { render } from "astro:content";
+
+export async function getStaticPaths() {
+	const posts = await getPublishedPosts();
+	return posts.map((post) => ({
+		params: { slug: post.id },
+		props: { post },
+	}));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const meta = {
+	articleDate: post.data.publishDate.toISOString(),
+	description: post.data.description,
+	title: post.data.title,
+};
+
+const dateFormat = new Intl.DateTimeFormat("en-US", {
+	year: "numeric",
+	month: "long",
+	day: "numeric",
+});
+---
+
+<PageLayout meta={meta}>
+	<article class="post">
+		<a href={withBase("/posts/")} class="back">Posts</a>
+		<h1>
+			{post.data.draft && <span class="draft-badge">[Draft]</span>}
+			{post.data.title}
+		</h1>
+		<div class="post-meta">
+			<time datetime={post.data.publishDate.toISOString()}>
+				{dateFormat.format(post.data.publishDate)}
+			</time>
+			{
+				post.data.videoUrl && (
+					<a href={post.data.videoUrl} class="video-link" rel="noopener" target="_blank">
+						Watch on YouTube
+					</a>
+				)
+			}
+		</div>
+		<div class="prose">
+			<Content />
+		</div>
+	</article>
+</PageLayout>
+
+<style>
+	.post {
+		padding: 8px 0 80px;
+	}
+	.back {
+		display: inline-block;
+		margin-bottom: 28px;
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+		color: hsl(var(--theme-text) / 0.66);
+	}
+	.back:hover {
+		color: hsl(var(--theme-accent));
+	}
+	.post h1 {
+		font-family: var(--font-serif);
+		font-weight: 500;
+		font-size: clamp(30px, 4.6vw, 42px);
+		letter-spacing: -0.02em;
+		line-height: 1.14;
+		color: hsl(var(--theme-text));
+		margin: 0;
+	}
+	.draft-badge {
+		font-family: var(--font-sans);
+		font-size: 0.42em;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: hsl(var(--theme-accent));
+		margin-right: 10px;
+		vertical-align: middle;
+	}
+	.post-meta {
+		display: flex;
+		align-items: baseline;
+		gap: 18px;
+		margin: 16px 0 40px;
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+	.video-link {
+		color: hsl(var(--theme-accent));
+	}
+	.prose :global(p) {
+		margin: 0 0 1.1em;
+	}
+</style>
