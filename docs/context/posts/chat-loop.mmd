@@ -1,0 +1,26 @@
+flowchart LR
+    Model(["ChatGPT / Claude"])
+    You(["You"])
+
+    subgraph Workspace["Your workspace"]
+        direction TB
+        Editor["Code editor"]
+        Terminal["Terminal"]
+        Sheet["Spreadsheet"]
+        Files["Files and folders"]
+    end
+
+    You -->|"1. describe the task"| Model
+    Model -->|"2. answer: code, steps, a formula"| You
+    You -->|"3. paste, run, edit, rename, all by hand"| Workspace
+    Workspace -->|"4. result or error"| You
+    You -->|"5. paste the error back"| Model
+    Model -.->|"can't reach in here"| Workspace
+
+    linkStyle 5 stroke:#c0392b,stroke-width:1.5px,stroke-dasharray:6 4
+    classDef human fill:#eef2ff,stroke:#6366f1,stroke-width:1.5px,color:#1e1b4b;
+    classDef model fill:#ecfdf5,stroke:#10b981,stroke-width:1.5px,color:#064e3b;
+    classDef work fill:#fff7ed,stroke:#f59e0b,color:#7c2d12;
+    class You human;
+    class Model model;
+    class Editor,Terminal,Sheet,Files work;

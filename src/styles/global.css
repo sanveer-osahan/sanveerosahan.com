@@ -125,6 +125,42 @@
 	}
 }
 
+/* Post diagrams: two screenshots, one per theme, swapped via [data-theme]. */
+figure.diagram {
+	margin: 34px 0;
+}
+figure.diagram img {
+	max-width: 100%;
+	height: auto;
+	margin: 0 auto;
+	border-radius: 8px;
+}
+figure.diagram figcaption {
+	font-family: var(--font-sans);
+	font-size: 14px;
+	font-style: italic;
+	text-align: center;
+	color: hsl(var(--theme-text) / 0.66);
+	margin-top: 12px;
+}
+/*
+ * Show one image per theme. These selectors carry the same specificity as
+ * `figure.diagram img`, so `display` is decided here alone, not overridden by
+ * the base rule. Default (light or no attribute): light shown, dark hidden.
+ */
+figure.diagram .theme-light-only {
+	display: block;
+}
+figure.diagram .theme-dark-only {
+	display: none;
+}
+:root[data-theme="dark"] figure.diagram .theme-light-only {
+	display: none;
+}
+:root[data-theme="dark"] figure.diagram .theme-dark-only {
+	display: block;
+}
+
 /* Timeline list — used by home & posts archive. */
 .timeline {
 	display: grid;
