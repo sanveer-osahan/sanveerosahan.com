@@ -24,19 +24,5 @@ There's a lot you can do past that text box.
 
 ## What a coding agent changes
 
-A coding agent takes that same model and gives it hands. It opens your files, runs your code, reads the error itself, and tries again, all without you playing courier.
-
-The shorthand is simple: **Agent = Model + Harness**. The model is the brain you already know from chat. The harness is everything wrapped around it that lets it act, the loop that keeps it going, the tools to read and write files and run commands, and the rules for what it's allowed to touch. Same brain, new body. I unpack the harness properly further down. For now, model plus harness is enough.
-
-Cursor, Claude Code, and Codex are all this one idea wearing different bodies.
-
-## What this post solves
-
-Two things stop most people from making the jump.
-
-First, it isn't obvious what an agent does that a chat window can't, or what you'd even point one at day to day. Second, once you're curious, you hit a wall of choices. Which agent? Which model behind it? And the big one, what does it cost? Plenty of people assume a real coding agent means $200 a month and quietly stop there.
-
-Both worries ease once you see the shape of it. A coding agent is a model plus a harness, and you get to mix the two. Different models, different harnesses, different price points. There is a workable coding agent for almost any budget, free included.
-
-So this post walks from premium down to free. For each tier I show you what to pick, how to set it up, and how it holds up on the same real task. By the end you can stand up your own coding agent at the price that fits you.
+A coding agent closes that gap. It can reach into your workspace and do the work itself. You ask in plain words, same as always, and it handles the rest.
 
