@@ -100,4 +100,22 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 	.prose :global(p) {
 		margin: 0 0 1.1em;
 	}
+	.prose :global(h2) {
+		font-family: var(--font-serif);
+		font-weight: 500;
+		font-size: clamp(22px, 3vw, 27px);
+		letter-spacing: -0.015em;
+		line-height: 1.2;
+		color: hsl(var(--theme-text));
+		margin: 1.8em 0 0.6em;
+	}
+	.prose :global(h3) {
+		font-family: var(--font-serif);
+		font-weight: 500;
+		font-size: clamp(18px, 2.4vw, 21px);
+		letter-spacing: -0.012em;
+		line-height: 1.25;
+		color: hsl(var(--theme-text));
+		margin: 1.5em 0 0.5em;
+	}
 </style>
