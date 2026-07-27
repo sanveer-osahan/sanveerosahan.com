@@ -51,6 +51,12 @@ Here you are charged based on which model you use and how much you use it. There
 These are language models, so all text is broken down into tokens. To keep it simple, assume 1 word = 1 token. What you send to the model are input tokens. What the model
 sends back are output tokens.
 
+<figure class="diagram">
+<img class="theme-light-only" src="/images/posts/set-up-your-ai-coding-agent/diagram-4-tokens.light.png" alt="Your files, prompts, and chat window all feed into the AI model as input tokens. The model sends back reasoning and responses as output tokens, and the responses flow back into the chat window." />
+<img class="theme-dark-only" src="/images/posts/set-up-your-ai-coding-agent/diagram-4-tokens.dark.png" alt="Your files, prompts, and chat window all feed into the AI model as input tokens. The model sends back reasoning and responses as output tokens, and the responses flow back into the chat window." />
+<figcaption>Everything you send in is input tokens. Everything the model sends back is output tokens.</figcaption>
+</figure>
+
 Every model sets its own input and output prices, and output costs more than input.
 
 You pick the model based on the complexity of the task. A larger model gives you better results but costs more.
