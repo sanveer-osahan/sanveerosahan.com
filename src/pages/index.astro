@@ -2,7 +2,18 @@
 import { Image } from "astro:assets";
 import PageLayout from "@/layouts/Base.astro";
 import { siteConfig } from "@/site-config";
+import { withBase } from "@/utils/path";
+import { getPublishedPosts } from "@/utils/posts";
 import dp from "../assets/Casual_DP.jpg";
+
+const FEED_LIMIT = 5;
+const posts = await getPublishedPosts();
+const feedPosts = posts.slice(0, FEED_LIMIT);
+const dateFormat = new Intl.DateTimeFormat("en-US", {
+	year: "numeric",
+	month: "short",
+	day: "numeric",
+});
 ---
 
 <PageLayout meta={{ title: siteConfig.title, description: siteConfig.description }}>
@@ -104,6 +115,31 @@ import dp from "../assets/Casual_DP.jpg";
 			</div>
 		</aside>
 	</section>
+
+	{
+		feedPosts.length > 0 && (
+			<section class="feed">
+				<h2>Posts</h2>
+				<ul class="feed-list">
+					{feedPosts.map((post) => (
+						<li class="feed-item">
+							<a href={withBase(`/posts/${post.id}/`)} class="feed-link">
+								<span class="feed-title">{post.data.title}</span>
+								<time datetime={post.data.publishDate.toISOString()} class="feed-date">
+									{dateFormat.format(post.data.publishDate)}
+								</time>
+							</a>
+						</li>
+					))}
+				</ul>
+				{posts.length > FEED_LIMIT && (
+					<a href={withBase("/posts/")} class="feed-more">
+						See all posts
+					</a>
+				)}
+			</section>
+		)
+	}
 </PageLayout>
 
 <style>
@@ -117,7 +153,7 @@ import dp from "../assets/Casual_DP.jpg";
 		width: min(940px, 100vw - 3rem);
 		margin-left: 50%;
 		transform: translateX(-50%);
-		padding: 24px 0 80px;
+		padding: 24px 0 48px;
 		display: grid;
 		grid-template-columns: 1fr 240px;
 		gap: 48px;
@@ -215,5 +251,62 @@ import dp from "../assets/Casual_DP.jpg";
 		color: hsl(var(--theme-link));
 		text-decoration: underline;
 		text-underline-offset: 3px;
+	}
+	.feed {
+		/* Same breakout as .intro so its left edge lines up with the bio text. */
+		width: min(940px, 100vw - 3rem);
+		margin-left: 50%;
+		transform: translateX(-50%);
+		padding: 32px 0 80px;
+		border-top: 1px solid var(--hairline);
+	}
+	.feed h2 {
+		font-family: var(--font-serif);
+		font-weight: 500;
+		font-size: clamp(22px, 3vw, 27px);
+		letter-spacing: -0.015em;
+		color: hsl(var(--theme-text));
+		margin: 0 0 24px;
+	}
+	.feed-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+	.feed-link {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 16px;
+	}
+	.feed-title {
+		font-family: var(--font-serif);
+		font-size: 17px;
+		color: hsl(var(--theme-text));
+	}
+	.feed-link:hover .feed-title {
+		color: hsl(var(--theme-accent));
+	}
+	.feed-date {
+		flex: none;
+		font-family: var(--font-sans);
+		font-size: 13px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+	.feed-more {
+		display: inline-block;
+		margin-top: 24px;
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+		color: hsl(var(--theme-accent));
+	}
+	@media (max-width: 720px) {
+		.feed-link {
+			flex-direction: column;
+			gap: 4px;
+		}
 	}
 </style>

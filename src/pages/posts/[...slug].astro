@@ -1,5 +1,6 @@
 ---
 import PageLayout from "@/layouts/Base.astro";
+import { getReadingTime } from "@/utils/reading-time";
 import { withBase } from "@/utils/path";
 import { getPublishedPosts } from "@/utils/posts";
 import { render } from "astro:content";
@@ -26,6 +27,8 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 	month: "long",
 	day: "numeric",
 });
+
+const readingMinutes = getReadingTime(post.body ?? "");
 ---
 
 <PageLayout meta={meta}>
@@ -39,11 +42,16 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 			<time datetime={post.data.publishDate.toISOString()}>
 				{dateFormat.format(post.data.publishDate)}
 			</time>
+			<span class="meta-sep" aria-hidden="true">·</span>
+			<span class="read-time">{readingMinutes} min read</span>
 			{
 				post.data.videoUrl && (
-					<a href={post.data.videoUrl} class="video-link" rel="noopener" target="_blank">
-						Watch on YouTube
-					</a>
+					<>
+						<span class="meta-sep" aria-hidden="true">·</span>
+						<a href={post.data.videoUrl} class="video-link" rel="noopener" target="_blank">
+							Watch on YouTube
+						</a>
+					</>
 				)
 			}
 		</div>
@@ -93,6 +101,9 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 		font-family: var(--font-sans);
 		font-size: 13.5px;
 		color: hsl(var(--theme-text) / 0.6);
+	}
+	.meta-sep {
+		color: hsl(var(--theme-text) / 0.35);
 	}
 	.video-link {
 		color: hsl(var(--theme-accent));
@@ -254,7 +265,31 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 	.prose :global(#cc-lin:checked ~ .tabnav label[for="cc-lin"]),
 	.prose :global(#cx-mac:checked ~ .tabnav label[for="cx-mac"]),
 	.prose :global(#cx-win:checked ~ .tabnav label[for="cx-win"]),
-	.prose :global(#cx-lin:checked ~ .tabnav label[for="cx-lin"]) {
+	.prose :global(#cx-lin:checked ~ .tabnav label[for="cx-lin"]),
+	.prose :global(#pagent-cc:checked ~ .tabnav label[for="pagent-cc"]),
+	.prose :global(#pagent-cx:checked ~ .tabnav label[for="pagent-cx"]),
+	.prose :global(#pcc-mac:checked ~ .tabnav label[for="pcc-mac"]),
+	.prose :global(#pcc-win:checked ~ .tabnav label[for="pcc-win"]),
+	.prose :global(#pcc-lin:checked ~ .tabnav label[for="pcc-lin"]),
+	.prose :global(#pcx-mac:checked ~ .tabnav label[for="pcx-mac"]),
+	.prose :global(#pcx-win:checked ~ .tabnav label[for="pcx-win"]),
+	.prose :global(#pcx-lin:checked ~ .tabnav label[for="pcx-lin"]),
+	.prose :global(#eagent-cc:checked ~ .tabnav label[for="eagent-cc"]),
+	.prose :global(#eagent-cx:checked ~ .tabnav label[for="eagent-cx"]),
+	.prose :global(#ecc-mac:checked ~ .tabnav label[for="ecc-mac"]),
+	.prose :global(#ecc-win:checked ~ .tabnav label[for="ecc-win"]),
+	.prose :global(#ecc-lin:checked ~ .tabnav label[for="ecc-lin"]),
+	.prose :global(#ecx-mac:checked ~ .tabnav label[for="ecx-mac"]),
+	.prose :global(#ecx-win:checked ~ .tabnav label[for="ecx-win"]),
+	.prose :global(#ecx-lin:checked ~ .tabnav label[for="ecx-lin"]),
+	.prose :global(#zagent-cc:checked ~ .tabnav label[for="zagent-cc"]),
+	.prose :global(#zagent-cx:checked ~ .tabnav label[for="zagent-cx"]),
+	.prose :global(#zcc-mac:checked ~ .tabnav label[for="zcc-mac"]),
+	.prose :global(#zcc-win:checked ~ .tabnav label[for="zcc-win"]),
+	.prose :global(#zcc-lin:checked ~ .tabnav label[for="zcc-lin"]),
+	.prose :global(#zcx-mac:checked ~ .tabnav label[for="zcx-mac"]),
+	.prose :global(#zcx-win:checked ~ .tabnav label[for="zcx-win"]),
+	.prose :global(#zcx-lin:checked ~ .tabnav label[for="zcx-lin"]) {
 		color: hsl(var(--theme-accent));
 		background: var(--paper);
 		border-color: var(--hairline);
@@ -266,7 +301,31 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 	.prose :global(#cc-lin:checked ~ .tabpanes > .pane-cc-lin),
 	.prose :global(#cx-mac:checked ~ .tabpanes > .pane-cx-mac),
 	.prose :global(#cx-win:checked ~ .tabpanes > .pane-cx-win),
-	.prose :global(#cx-lin:checked ~ .tabpanes > .pane-cx-lin) {
+	.prose :global(#cx-lin:checked ~ .tabpanes > .pane-cx-lin),
+	.prose :global(#pagent-cc:checked ~ .tabpanes > .pane-pagent-cc),
+	.prose :global(#pagent-cx:checked ~ .tabpanes > .pane-pagent-cx),
+	.prose :global(#pcc-mac:checked ~ .tabpanes > .pane-pcc-mac),
+	.prose :global(#pcc-win:checked ~ .tabpanes > .pane-pcc-win),
+	.prose :global(#pcc-lin:checked ~ .tabpanes > .pane-pcc-lin),
+	.prose :global(#pcx-mac:checked ~ .tabpanes > .pane-pcx-mac),
+	.prose :global(#pcx-win:checked ~ .tabpanes > .pane-pcx-win),
+	.prose :global(#pcx-lin:checked ~ .tabpanes > .pane-pcx-lin),
+	.prose :global(#eagent-cc:checked ~ .tabpanes > .pane-eagent-cc),
+	.prose :global(#eagent-cx:checked ~ .tabpanes > .pane-eagent-cx),
+	.prose :global(#ecc-mac:checked ~ .tabpanes > .pane-ecc-mac),
+	.prose :global(#ecc-win:checked ~ .tabpanes > .pane-ecc-win),
+	.prose :global(#ecc-lin:checked ~ .tabpanes > .pane-ecc-lin),
+	.prose :global(#ecx-mac:checked ~ .tabpanes > .pane-ecx-mac),
+	.prose :global(#ecx-win:checked ~ .tabpanes > .pane-ecx-win),
+	.prose :global(#ecx-lin:checked ~ .tabpanes > .pane-ecx-lin),
+	.prose :global(#zagent-cc:checked ~ .tabpanes > .pane-zagent-cc),
+	.prose :global(#zagent-cx:checked ~ .tabpanes > .pane-zagent-cx),
+	.prose :global(#zcc-mac:checked ~ .tabpanes > .pane-zcc-mac),
+	.prose :global(#zcc-win:checked ~ .tabpanes > .pane-zcc-win),
+	.prose :global(#zcc-lin:checked ~ .tabpanes > .pane-zcc-lin),
+	.prose :global(#zcx-mac:checked ~ .tabpanes > .pane-zcx-mac),
+	.prose :global(#zcx-win:checked ~ .tabpanes > .pane-zcx-win),
+	.prose :global(#zcx-lin:checked ~ .tabpanes > .pane-zcx-lin) {
 		display: block;
 	}
 	.prose :global(a) {
