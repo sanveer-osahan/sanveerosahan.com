@@ -1,0 +1,53 @@
+---
+import NoteWall from "@/components/NoteWall.astro";
+import PageLayout from "@/layouts/Base.astro";
+import { siteConfig } from "@/site-config";
+import { getNotes } from "@/utils/notes";
+
+const meta = {
+	description: `Short notes by ${siteConfig.author}.`,
+	title: "Notes",
+};
+
+const notes = await getNotes();
+---
+
+<PageLayout meta={meta}>
+	<section class="page">
+		<h1>Notes</h1>
+
+		{
+			notes.length === 0 ? (
+				<p class="empty">Nothing here yet.</p>
+			) : (
+				<NoteWall notes={notes} permalinks />
+			)
+		}
+	</section>
+</PageLayout>
+
+<style>
+	/*
+	 * Breaks out of the 760px site shell to ~940px, the same trick Home uses,
+	 * because three columns of cards need more room than the reading measure.
+	 */
+	.page {
+		width: min(940px, 100vw - 3rem);
+		margin-left: 50%;
+		transform: translateX(-50%);
+		padding: 24px 0 80px;
+	}
+	.page h1 {
+		font-family: var(--font-serif);
+		font-weight: 500;
+		font-size: clamp(32px, 5vw, 44px);
+		letter-spacing: -0.02em;
+		line-height: 1.12;
+		color: hsl(var(--theme-text));
+		margin: 0 0 40px;
+	}
+	.empty {
+		color: hsl(var(--theme-text) / 0.6);
+		font-style: italic;
+	}
+</style>

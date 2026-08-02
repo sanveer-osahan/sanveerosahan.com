@@ -64,5 +64,8 @@ a mistake already written down.
 - `public/_redirects` is a permanent file. It is the only reason the original
   Article URL still resolves, so it outlives the rename that caused it.
 - `docs/context/posts/` moved to `docs/context/articles/` and the docs that
-  discuss writing were reworded from "post" to "article", so the vocabulary is
-  consistent everywhere the word appears.
+  discuss writing were reworded from "post" to "article".
+- Asset paths under `public/images/posts/<slug>/` keep the old word on purpose.
+  They are live URLs on the CDN, so renaming them would break cached references
+  and social card images to buy nothing a reader ever sees. The word "post"
+  survives there and nowhere else.

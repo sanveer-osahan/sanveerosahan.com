@@ -1,0 +1,121 @@
+---
+import { type CollectionEntry, render } from "astro:content";
+
+interface Props {
+	notes: CollectionEntry<"notes">[];
+	/*
+	 * Permalinks are shown on /notes/ only. On the home page the card is plain
+	 * content, because clicking it would land the reader on the note they just
+	 * read. "See all notes" is the call to action there instead.
+	 */
+	permalinks?: boolean;
+}
+
+const { notes, permalinks = false } = Astro.props;
+
+// Month and year only. The day and time exist to order the wall, not to be read.
+const dateFormat = new Intl.DateTimeFormat("en-US", {
+	year: "numeric",
+	month: "long",
+});
+
+const rendered = await Promise.all(
+	notes.map(async (note) => ({ note, Content: (await render(note)).Content })),
+);
+---
+
+<div class="wall">
+	{
+		rendered.map(({ note, Content }) => (
+			<article class="note" id={note.id}>
+				<div class="note-body">
+					<Content />
+				</div>
+				<footer class="note-foot">
+					<time datetime={note.data.publishDate.toISOString()} class="note-when">
+						{dateFormat.format(note.data.publishDate)}
+					</time>
+					{permalinks && (
+						<a class="note-perma" href={`#${note.id}`} aria-label="Link to this note">
+							&#8470;
+						</a>
+					)}
+				</footer>
+			</article>
+		))
+	}
+</div>
+
+<style>
+	.wall {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 20px;
+		/* Equal height per row: every card matches the tallest in its row. */
+		align-items: stretch;
+	}
+	.note {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		border-top: 3px solid hsl(var(--theme-accent));
+		border-radius: 3px;
+		padding: 22px 22px 16px;
+		box-shadow: 0 2px 6px -3px hsl(var(--theme-text) / 0.18);
+	}
+	.note-body {
+		font-family: var(--font-serif);
+		font-size: 15px;
+		line-height: 1.62;
+		color: hsl(var(--theme-text-muted));
+	}
+	.note-body :global(p) {
+		margin: 0 0 0.85em;
+	}
+	.note-body :global(p:last-child) {
+		margin-bottom: 0;
+	}
+	/*
+	 * margin-top:auto pins the footer to the card's bottom edge, so the slack
+	 * created by equal-height rows falls between the text and the footer rather
+	 * than pooling underneath everything.
+	 */
+	.note-foot {
+		margin-top: auto;
+		padding-top: 18px;
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 12px;
+	}
+	.note-when {
+		font-family: var(--font-sans);
+		font-size: 12px;
+		letter-spacing: 0.04em;
+		color: hsl(var(--theme-text) / 0.45);
+	}
+	.note-perma {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		line-height: 1;
+		color: hsl(var(--theme-accent));
+		opacity: 0;
+		transition: opacity 0.2s ease;
+	}
+	/* focus-within keeps the permalink reachable by keyboard, not just by mouse. */
+	.note:hover .note-perma,
+	.note:focus-within .note-perma {
+		opacity: 0.75;
+	}
+	.note-perma:hover,
+	.note-perma:focus-visible {
+		opacity: 1;
+	}
+	@media (max-width: 720px) {
+		.wall {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

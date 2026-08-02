@@ -1,14 +1,19 @@
 ---
 import { Image } from "astro:assets";
+import NoteWall from "@/components/NoteWall.astro";
 import PageLayout from "@/layouts/Base.astro";
 import { siteConfig } from "@/site-config";
 import { withBase } from "@/utils/path";
-import { getPublishedPosts } from "@/utils/posts";
+import { getPublishedArticles } from "@/utils/articles";
+import { getNotes } from "@/utils/notes";
 import dp from "../assets/Casual_DP.jpg";
 
 const FEED_LIMIT = 5;
-const posts = await getPublishedPosts();
-const feedPosts = posts.slice(0, FEED_LIMIT);
+const NOTE_LIMIT = 3;
+const articles = await getPublishedArticles();
+const feedArticles = articles.slice(0, FEED_LIMIT);
+const notes = await getNotes();
+const feedNotes = notes.slice(0, NOTE_LIMIT);
 const dateFormat = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 	month: "short",
@@ -147,24 +152,40 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 	</section>
 
 	{
-		feedPosts.length > 0 && (
+		feedArticles.length > 0 && (
 			<section class="feed">
-				<h2>Posts</h2>
+				<h2>Articles</h2>
 				<ul class="feed-list">
-					{feedPosts.map((post) => (
+					{feedArticles.map((article) => (
 						<li class="feed-item">
-							<a href={withBase(`/posts/${post.id}/`)} class="feed-link">
-								<span class="feed-title">{post.data.title}</span>
-								<time datetime={post.data.publishDate.toISOString()} class="feed-date">
-									{dateFormat.format(post.data.publishDate)}
+							<a href={withBase(`/articles/${article.id}/`)} class="feed-link">
+								<span class="feed-title">{article.data.title}</span>
+								<time datetime={article.data.publishDate.toISOString()} class="feed-date">
+									{dateFormat.format(article.data.publishDate)}
 								</time>
 							</a>
 						</li>
 					))}
 				</ul>
-				{posts.length > FEED_LIMIT && (
-					<a href={withBase("/posts/")} class="feed-more">
-						See all posts
+				{articles.length > FEED_LIMIT && (
+					<a href={withBase("/articles/")} class="feed-more">
+						See all articles
+					</a>
+				)}
+			</section>
+		)
+	}
+
+	{
+		feedNotes.length > 0 && (
+			<section class="feed">
+				<h2>Notes</h2>
+				{/* No permalinks here: the reader just read the note, so linking to
+				    it again is a dead end. "See all notes" is the way onward. */}
+				<NoteWall notes={feedNotes} />
+				{notes.length > NOTE_LIMIT && (
+					<a href={withBase("/notes/")} class="feed-more">
+						See all notes
 					</a>
 				)}
 			</section>

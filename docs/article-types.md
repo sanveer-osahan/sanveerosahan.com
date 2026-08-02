@@ -1,8 +1,8 @@
-# Technical post types
+# Technical article types
 
-Four formats for a technical post, each with its own shape. Pick the one that
+Four formats for a technical article, each with its own shape. Pick the one that
 fits the goal before drafting. Adapted from BlackGirlBytes, "The Ultimate Guide
-to Writing Technical Blog Posts"
+to Writing Technical Blog Articles"
 (https://dev.to/blackgirlbytes/the-ultimate-guide-to-writing-technical-blog-posts-5464).
 
 ## 1. How-to
@@ -50,9 +50,9 @@ Shape:
 2. The list items, each with a short explanation and example.
 3. Conclusion: final thoughts, call to action.
 
-## Note for the AI coding agents post
+## Note for the AI coding agents article
 
 It's a blend. The setup walk-through is a **how-to**, the "Agent = Model +
 Harness" section is an **explainer**, and the tokens-per-second and quality
 comparison carries an **opinion**. Lead with the how-to spine and fold the
-other two in where they support it, rather than switching format mid-post.
+other two in where they support it, rather than switching format mid-article.

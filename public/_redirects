@@ -1,0 +1,3 @@
+# Posts became Articles on 2026-08-02 (see docs/adr/0003). Cloudflare Pages
+# serves this file on static builds. Permanent: the old URL was published.
+/posts/*  /articles/:splat  301

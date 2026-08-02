@@ -1,6 +1,6 @@
 # Context: Set Up your AI Coding Agent
 
-Post-local context for `src/content/posts/set-up-your-ai-coding-agent.md`.
+Article-local context for `src/content/articles/set-up-your-ai-coding-agent.md`.
 Site-wide vocabulary and voice live in the root `CONTEXT.md`.
 
 ## Post type
@@ -219,7 +219,7 @@ lot to do past the chat box. Pitch every explanation at the reader who knows les
 Third tier section, Claude Pro and ChatGPT Plus. Tabset IDs use an `e` prefix
 (`eagent-cc`/`eagent-cx`, `ecc-mac/win/lin`, `ecx-mac/win/lin`), matching the `p`
 prefix pattern from Premium. CSS selectors for these live in
-`src/pages/posts/[...slug].astro` alongside the `p`-prefixed ones, added by hand
+`src/pages/articles/[...slug].astro` alongside the `p`-prefixed ones, added by hand
 since there is no scaffolding-ahead-of-content step for this tier.
 
 No new pricing or usage-limit explanation in this section. The brief for it was
@@ -425,7 +425,7 @@ Entry-Level, Zero-Cost), not resorted by price, so the matrix previews the post
 instead of reordering it.
 
 Entry-Level had a small "Start here" tag (`.start-here` in
-`src/pages/posts/[...slug].astro`, styled after `.draft-badge`), removed after
+`src/pages/articles/[...slug].astro`, styled after `.draft-badge`), removed after
 the user asked for it to be cut. The row is plain now, no visual distinction
 from the other three tiers in the matrix.
 

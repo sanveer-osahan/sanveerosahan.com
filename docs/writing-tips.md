@@ -1,6 +1,6 @@
 # Technical blog writing tips
 
-Reference for writing posts. Technical writing is taking a complex coding or
+Reference for writing articles. Technical writing is taking a complex coding or
 engineering topic and breaking it into something a reader can follow and use.
 It builds a personal brand, sharpens your own understanding through teaching,
 and hands the community a working solution.

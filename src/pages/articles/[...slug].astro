@@ -2,24 +2,24 @@
 import PageLayout from "@/layouts/Base.astro";
 import { getReadingTime } from "@/utils/reading-time";
 import { withBase } from "@/utils/path";
-import { getPublishedPosts } from "@/utils/posts";
+import { getPublishedArticles } from "@/utils/articles";
 import { render } from "astro:content";
 
 export async function getStaticPaths() {
-	const posts = await getPublishedPosts();
-	return posts.map((post) => ({
-		params: { slug: post.id },
-		props: { post },
+	const articles = await getPublishedArticles();
+	return articles.map((article) => ({
+		params: { slug: article.id },
+		props: { article },
 	}));
 }
 
-const { post } = Astro.props;
-const { Content } = await render(post);
+const { article } = Astro.props;
+const { Content } = await render(article);
 
 const meta = {
-	articleDate: post.data.publishDate.toISOString(),
-	description: post.data.description,
-	title: post.data.title,
+	articleDate: article.data.publishDate.toISOString(),
+	description: article.data.description,
+	title: article.data.title,
 };
 
 const dateFormat = new Intl.DateTimeFormat("en-US", {
@@ -28,27 +28,27 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 	day: "numeric",
 });
 
-const readingMinutes = getReadingTime(post.body ?? "");
+const readingMinutes = getReadingTime(article.body ?? "");
 ---
 
 <PageLayout meta={meta}>
-	<article class="post">
-		<a href={withBase("/posts/")} class="back">Posts</a>
+	<article class="article">
+		<a href={withBase("/articles/")} class="back">Articles</a>
 		<h1>
-			{post.data.draft && <span class="draft-badge">[Draft]</span>}
-			{post.data.title}
+			{article.data.draft && <span class="draft-badge">[Draft]</span>}
+			{article.data.title}
 		</h1>
-		<div class="post-meta">
-			<time datetime={post.data.publishDate.toISOString()}>
-				{dateFormat.format(post.data.publishDate)}
+		<div class="article-meta">
+			<time datetime={article.data.publishDate.toISOString()}>
+				{dateFormat.format(article.data.publishDate)}
 			</time>
 			<span class="meta-sep" aria-hidden="true">·</span>
 			<span class="read-time">{readingMinutes} min read</span>
 			{
-				post.data.videoUrl && (
+				article.data.videoUrl && (
 					<>
 						<span class="meta-sep" aria-hidden="true">·</span>
-						<a href={post.data.videoUrl} class="video-link" rel="noopener" target="_blank">
+						<a href={article.data.videoUrl} class="video-link" rel="noopener" target="_blank">
 							Watch on YouTube
 						</a>
 					</>
@@ -62,7 +62,7 @@ const readingMinutes = getReadingTime(post.body ?? "");
 </PageLayout>
 
 <style>
-	.post {
+	.article {
 		padding: 8px 0 80px;
 	}
 	.back {
@@ -75,7 +75,7 @@ const readingMinutes = getReadingTime(post.body ?? "");
 	.back:hover {
 		color: hsl(var(--theme-accent));
 	}
-	.post h1 {
+	.article h1 {
 		font-family: var(--font-serif);
 		font-weight: 500;
 		font-size: clamp(30px, 4.6vw, 42px);
@@ -93,7 +93,7 @@ const readingMinutes = getReadingTime(post.body ?? "");
 		margin-right: 10px;
 		vertical-align: middle;
 	}
-	.post-meta {
+	.article-meta {
 		display: flex;
 		align-items: baseline;
 		gap: 18px;

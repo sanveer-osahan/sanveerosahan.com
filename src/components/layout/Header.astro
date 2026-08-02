@@ -1,23 +1,40 @@
 ---
 import { siteConfig } from "@/site-config";
 import { withBase } from "@/utils/path";
-import { getPublishedPosts } from "@/utils/posts";
+import { getPublishedArticles } from "@/utils/articles";
+import { getNotes } from "@/utils/notes";
 import ThemeToggle from "../ThemeToggle.astro";
 
 const wordmark = siteConfig.title;
-const hasPosts = (await getPublishedPosts()).length > 0;
-const postsActive = Astro.url.pathname.replace(/\/$/, "").endsWith("/posts");
+
+/*
+ * Each link renders only when its collection has entries, so production never
+ * shows a nav link that leads to an empty page.
+ */
+const hasArticles = (await getPublishedArticles()).length > 0;
+const hasNotes = (await getNotes()).length > 0;
+
+const path = Astro.url.pathname.replace(/\/$/, "");
+const articlesActive = path.endsWith("/articles");
+const notesActive = path.endsWith("/notes");
 ---
 
 <header class="site-header" id="main-header">
 	<a href={withBase("/")} class="wordmark">{wordmark}</a>
 	<div class="header-right">
 		{
-			hasPosts && (
+			(hasArticles || hasNotes) && (
 				<nav class="nav">
-					<a href={withBase("/posts/")} class:list={{ active: postsActive }}>
-						Posts
-					</a>
+					{hasArticles && (
+						<a href={withBase("/articles/")} class:list={{ active: articlesActive }}>
+							Articles
+						</a>
+					)}
+					{hasNotes && (
+						<a href={withBase("/notes/")} class:list={{ active: notesActive }}>
+							Notes
+						</a>
+					)}
 				</nav>
 			)
 		}
