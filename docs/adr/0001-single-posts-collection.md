@@ -2,7 +2,11 @@
 
 ## Status
 
-accepted
+superseded by [ADR-0003](./0003-notes-as-a-separate-collection.md)
+
+The split this ADR anticipated ("split when the volume of one kind earns its own
+type") happened. Notes became their own collection and `posts` was renamed to
+`articles`. The reasoning below is kept because it is why the split waited.
 
 ## Context
 
