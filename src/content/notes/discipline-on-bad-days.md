@@ -1,5 +1,5 @@
 ---
-publishDate: 2026-08-02T12:00:00
+publishDate: 2026-08-02T09:00:00
 ---
 
 Staying on track is easy when you're having a good day.

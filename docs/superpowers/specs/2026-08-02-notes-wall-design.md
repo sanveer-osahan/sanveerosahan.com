@@ -5,9 +5,16 @@ Design spec. Decided 2026-08-02. Architectural record in
 
 ## Goal
 
-Add a dedicated page for short standalone thoughts, shown as cards three across.
+Add a dedicated page for short standalone thoughts, shown as one card per row.
 Rename the existing Posts section to Articles. Surface the newest three Notes on
 the home page.
+
+The wall started as a three-column grid during design (see the card-style and
+homepage mockups referenced below) and moved to a single column after
+comparing 3-up, 2-up, and 1-up with real content live in the dev server. The
+single column read better for text this dense, and it removed the
+equal-height-row problem the 3-up grid was designed around, since a lone card
+in a row has no neighbor to leave dead space next to.
 
 ## Domain model
 
@@ -111,15 +118,19 @@ Index card. Values reuse existing tokens from `global.css`; no new ones.
 | radius | `3px` |
 | padding | `22px 22px 16px` |
 | shadow | `0 2px 6px -3px` at low opacity |
-| body | `var(--font-serif)`, 15px, line-height 1.62, `hsl(var(--theme-text-muted))` |
+| body | `var(--font-serif)`, no font-size override, `hsl(var(--theme-text-muted))` |
 | footer | pinned with `margin-top: auto` |
 | date | `var(--font-sans)`, 12px, `hsl(var(--theme-text) / 0.45)`, format `"August 2026"` |
 | permalink | `№`, `hsl(var(--theme-accent))`, `opacity: 0` rising to `0.75` on `:hover` and `:focus-within` |
 
 Date format is `Intl.DateTimeFormat("en-US", { year: "numeric", month: "long" })`.
 
-The footer is pinned to the card's bottom edge so equal-height rows put their
-slack between the text and the footer rather than pooling it underneath.
+The card body has no explicit `font-size`. It inherits the `body` element's
+18px/17px/16.5px scale (`layouts/Base.astro`), the same rule article prose
+runs on, so a note and an article read at the same size at every breakpoint
+without a second hardcoded number to keep in sync.
+
+The footer is pinned to the card's bottom edge with `margin-top: auto`.
 
 The permalink must stay reachable by keyboard. `:focus-within` on the card
 handles that, so tabbing to the anchor reveals it.
@@ -130,14 +141,12 @@ No handwriting font. `--font-hand` stays unused and no font dependency is added.
 
 ```css
 display: grid;
-grid-template-columns: repeat(3, 1fr);
+grid-template-columns: 1fr;
 gap: 20px;
-align-items: stretch;
 ```
 
-Equal height per row: cards in a row match the tallest. Order is strictly
-newest first, left to right. Collapses to one column at the existing 720px
-breakpoint.
+One card per row. Order is strictly newest first, top to bottom. No column
+breakpoint is needed since the grid is already single-column at every width.
 
 ## Pages
 
@@ -159,12 +168,15 @@ Order below the intro, unchanged above it:
 2. `Notes` heading, `<NoteWall>` with the newest 3, no permalinks, "See all
    notes" when more than 3 exist
 
-`NOTE_LIMIT = 3`, one full row. Cards on the home page are plain content and
-link nowhere; "See all notes" is the only call to action in that section.
+`NOTE_LIMIT = 3`. Cards on the home page are plain content and link nowhere;
+"See all notes" is the only call to action in that section.
 
 The Notes section reuses the existing `.feed` breakout on the home page, the
 940px `margin-left: 50%` plus `translateX(-50%)` pattern, so its left edge lines
-up with the bio text and the Articles list above it.
+up with the bio text and the Articles list above it. `NoteWall`'s own
+`max-width: var(--reading-width)` then caps each card's line length inside
+that wider block, so the Articles list can use the full breakout width while
+Note text stays as narrow as article prose.
 
 ### Header
 
@@ -179,10 +191,10 @@ order matches the order below.
 
 | Slug | Time | Opening line |
 | --- | --- | --- |
-| `discipline-on-bad-days` | `T12:00` | "Staying on track is easy when you're having a good day." |
-| `do-hard-things` | `T11:00` | "The person you are when no one is watching is the real you." |
-| `sales-sustains-the-business` | `T10:00` | "When I was young in my software engineering career..." |
-| `comprehension-debt` | `T09:00` | "There is something appealing about still watching tutorial videos..." |
+| `comprehension-debt` | `T12:00` | "There is something appealing about still watching tutorial videos..." |
+| `sales-sustains-the-business` | `T11:00` | "When I was young in my software engineering career..." |
+| `do-hard-things` | `T10:00` | "The person you are when no one is watching is the real you." |
+| `discipline-on-bad-days` | `T09:00` | "Staying on track is easy when you're having a good day." |
 
 Bodies are the user's text verbatim, with paragraph breaks preserved and stray
 leading whitespace cleaned up.
@@ -238,8 +250,8 @@ Docs already written as part of this design: `CONTEXT.md`, `CONTEXT-MAP.md`,
 - `pnpm lint` passes.
 - `/articles/set-up-your-ai-coding-agent/` renders; `/posts/...` 301s to it once
   deployed.
-- `/notes/` shows four cards, three in the first row and one in the second, all
-  reading "August 2026".
+- `/notes/` shows four cards stacked one per row, newest first
+  (`comprehension-debt` on top), all reading "August 2026".
 - `/notes/#comprehension-debt` scrolls to the correct card.
 - Home page shows Articles then three Notes.
 - Both themes render the card correctly, and the permalink appears on keyboard

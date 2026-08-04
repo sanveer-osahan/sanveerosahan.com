@@ -10,7 +10,7 @@ ADR-0001 put every piece of writing into one broad `posts` collection and said
 to split "when the volume of one kind earns its own type". Four short pieces
 arrived at once: standalone thoughts with no title, no description, and no
 reason to have a page of their own. They are meant to be read as a wall of
-cards, three across, not as a list of links.
+cards, not as a list of links.
 
 Forcing them into the Post schema would mean four files carrying a `title` and
 `description` that nothing renders, and every existing query growing a filter.
@@ -58,9 +58,11 @@ a mistake already written down.
 - Note cards show month and year, never the day. The day and time in
   `publishDate` are therefore free ordering control: several Notes published on
   the same day can be sequenced exactly by time, invisibly to readers.
-- The Notes wall uses equal-height rows, so one long Note inflates its whole
-  row. The 150 word guidance in `CONTEXT.md` is a layout constraint as much as a
-  vocabulary one, and nothing enforces it.
+- The wall settled on one card per row after comparing 3-up, 2-up, and 1-up
+  live: single column read better for text this dense and lets a Note's font
+  size inherit the same body scale article prose uses, capped to the same
+  reading measure (`--reading-width`). The 150 word guidance in `CONTEXT.md`
+  is still the boundary against an Article, and nothing enforces it.
 - `public/_redirects` is a permanent file. It is the only reason the original
   Article URL still resolves, so it outlives the rename that caused it.
 - `docs/context/posts/` moved to `docs/context/articles/` and the docs that

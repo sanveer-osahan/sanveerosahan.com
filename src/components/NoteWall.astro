@@ -47,12 +47,17 @@ const rendered = await Promise.all(
 </div>
 
 <style>
+	/*
+	 * max-width caps line length at the same measure article prose uses,
+	 * regardless of how wide the page around the wall is. On the home page
+	 * .feed breaks out to 940px for the Articles list; without this the
+	 * Notes cards would stretch to match instead of staying readable.
+	 */
 	.wall {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: 1fr;
 		gap: 20px;
-		/* Equal height per row: every card matches the tallest in its row. */
-		align-items: stretch;
+		max-width: var(--reading-width);
 	}
 	.note {
 		position: relative;
@@ -65,10 +70,10 @@ const rendered = await Promise.all(
 		padding: 22px 22px 16px;
 		box-shadow: 0 2px 6px -3px hsl(var(--theme-text) / 0.18);
 	}
+	/* No font-size here: it inherits the same 18px/17px/16.5px body scale
+	 * (layouts/Base.astro) that article prose uses, so the two never drift. */
 	.note-body {
 		font-family: var(--font-serif);
-		font-size: 15px;
-		line-height: 1.62;
 		color: hsl(var(--theme-text-muted));
 	}
 	.note-body :global(p) {
@@ -77,13 +82,7 @@ const rendered = await Promise.all(
 	.note-body :global(p:last-child) {
 		margin-bottom: 0;
 	}
-	/*
-	 * margin-top:auto pins the footer to the card's bottom edge, so the slack
-	 * created by equal-height rows falls between the text and the footer rather
-	 * than pooling underneath everything.
-	 */
 	.note-foot {
-		margin-top: auto;
 		padding-top: 18px;
 		display: flex;
 		align-items: baseline;
@@ -112,10 +111,5 @@ const rendered = await Promise.all(
 	.note-perma:hover,
 	.note-perma:focus-visible {
 		opacity: 1;
-	}
-	@media (max-width: 720px) {
-		.wall {
-			grid-template-columns: 1fr;
-		}
 	}
 </style>

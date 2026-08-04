@@ -1,5 +1,5 @@
 ---
-publishDate: 2026-08-02T11:00:00
+publishDate: 2026-08-02T10:00:00
 ---
 
 The person you are when no one is watching is the real you.

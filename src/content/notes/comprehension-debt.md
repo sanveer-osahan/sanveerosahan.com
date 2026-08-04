@@ -1,5 +1,5 @@
 ---
-publishDate: 2026-08-02T09:00:00
+publishDate: 2026-08-02T12:00:00
 ---
 
 There is something appealing about still watching tutorial videos or reading documentation where the steps being performed have an explanation of what we are doing and why we are doing it.

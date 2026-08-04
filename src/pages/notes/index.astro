@@ -28,13 +28,10 @@ const notes = await getNotes();
 
 <style>
 	/*
-	 * Breaks out of the 760px site shell to ~940px, the same trick Home uses,
-	 * because three columns of cards need more room than the reading measure.
+	 * No breakout: the wall is one column now, so a note reads at the same
+	 * width as article prose rather than the wider measure a 3-up grid needed.
 	 */
 	.page {
-		width: min(940px, 100vw - 3rem);
-		margin-left: 50%;
-		transform: translateX(-50%);
 		padding: 24px 0 80px;
 	}
 	.page h1 {

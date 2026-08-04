@@ -1,5 +1,5 @@
 ---
-publishDate: 2026-08-02T10:00:00
+publishDate: 2026-08-02T11:00:00
 ---
 
 When I was young in my software engineering career, I thought writing good, bug-free code was the most important thing that made a business run.
