@@ -6,14 +6,18 @@ import { siteConfig } from "@/site-config";
 import { withBase } from "@/utils/path";
 import { getPublishedArticles } from "@/utils/articles";
 import { getNotes } from "@/utils/notes";
+import { getReadings } from "@/utils/readings";
 import dp from "../assets/Casual_DP.jpg";
 
 const FEED_LIMIT = 5;
 const NOTE_LIMIT = 3;
+const BOOK_LIMIT = 3;
 const articles = await getPublishedArticles();
 const feedArticles = articles.slice(0, FEED_LIMIT);
 const notes = await getNotes();
 const feedNotes = notes.slice(0, NOTE_LIMIT);
+const readings = await getReadings();
+const feedReadings = readings.slice(0, BOOK_LIMIT);
 const dateFormat = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 	month: "short",
@@ -191,6 +195,37 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 			</section>
 		)
 	}
+
+	{
+		feedReadings.length > 0 && (
+			<section class="feed">
+				{/* "From my bookshelf" stays true whether a book is finished or opened
+				    yesterday. A Reading carries no status, so no heading here can
+				    claim one. */}
+				<h2>From my bookshelf</h2>
+				<ul class="book-row">
+					{feedReadings.map((reading) => (
+						<li>
+							<a href={withBase(`/bookshelf/${reading.id}/`)} class="book-link">
+								<Image
+									class="book-cover"
+									src={reading.data.cover}
+									alt={`Cover of ${reading.data.title}`}
+								/>
+								<span class="book-title">{reading.data.title}</span>
+								<span class="book-author">{reading.data.author.join(", ")}</span>
+							</a>
+						</li>
+					))}
+				</ul>
+				{readings.length > BOOK_LIMIT && (
+					<a href={withBase("/bookshelf/")} class="feed-more">
+						See the whole shelf
+					</a>
+				)}
+			</section>
+		)
+	}
 </PageLayout>
 
 <style>
@@ -353,6 +388,53 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 		font-family: var(--font-sans);
 		font-size: 13.5px;
 		color: hsl(var(--theme-accent));
+	}
+	/*
+	 * A left-aligned row of fixed-width covers, not a grid. The home page
+	 * breaks out to 940px, and three covers stretched across that width would
+	 * outweigh the writing above them.
+	 */
+	.book-row {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: start;
+		gap: 28px;
+	}
+	.book-link {
+		display: grid;
+		gap: 4px;
+		width: 128px;
+	}
+	.book-cover {
+		width: 100%;
+		height: auto;
+		display: block;
+		margin-bottom: 10px;
+		border-radius: 4px;
+		border: 1px solid hsl(var(--theme-text) / 0.1);
+		box-shadow: 0 6px 18px hsl(var(--theme-text) / 0.12);
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	}
+	.book-link:hover .book-cover {
+		transform: translateY(-3px);
+		box-shadow: 0 10px 24px hsl(var(--theme-text) / 0.18);
+	}
+	.book-title {
+		font-family: var(--font-serif);
+		font-size: 15px;
+		line-height: 1.3;
+		color: hsl(var(--theme-text));
+	}
+	.book-link:hover .book-title {
+		color: hsl(var(--theme-accent));
+	}
+	.book-author {
+		font-family: var(--font-sans);
+		font-size: 12.5px;
+		color: hsl(var(--theme-text) / 0.6);
 	}
 	@media (max-width: 720px) {
 		.feed-link {

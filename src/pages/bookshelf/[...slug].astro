@@ -1,0 +1,237 @@
+---
+import { Image } from "astro:assets";
+import { render } from "astro:content";
+import PageLayout from "@/layouts/Base.astro";
+import { withBase } from "@/utils/path";
+import { getReadings } from "@/utils/readings";
+
+export async function getStaticPaths() {
+	const readings = await getReadings();
+	return readings.map((reading) => ({
+		params: { slug: reading.id },
+		props: { reading },
+	}));
+}
+
+const { reading } = Astro.props;
+const { Content } = await render(reading);
+
+const authors = reading.data.author.join(" and ");
+
+/*
+ * A Reading goes live with the book details and an empty body, then grows one
+ * chapter at a time. An empty body therefore means "still reading", which is
+ * the job the dropped `status` field would have done.
+ */
+const hasLearnings = (reading.body ?? "").trim().length > 0;
+
+const meta = {
+	description: `What I took from ${reading.data.title} by ${authors}.`,
+	title: reading.data.title,
+	ogImage: reading.data.cover.src,
+	ogImageWidth: reading.data.cover.width,
+	ogImageHeight: reading.data.cover.height,
+};
+
+const yearFormat = new Intl.DateTimeFormat("en-US", {
+	year: "numeric",
+	month: "long",
+	day: "numeric",
+});
+---
+
+<PageLayout meta={meta}>
+	<article class="reading">
+		<a href={withBase("/bookshelf/")} class="back">Bookshelf</a>
+		<h1>
+			{reading.data.draft && <span class="draft-badge">[Draft]</span>}
+			{reading.data.title}
+		</h1>
+		{reading.data.subtitle && <p class="subtitle">{reading.data.subtitle}</p>}
+
+		<div class="book">
+			<Image class="cover" src={reading.data.cover} alt={`Cover of ${reading.data.title}`} />
+
+			<div class="book-details">
+				<dl class="facts">
+					<dt>{reading.data.author.length > 1 ? "Authors" : "Author"}</dt>
+					<dd>{reading.data.author.join(", ")}</dd>
+
+					<dt>Published</dt>
+					<dd>
+						<time datetime={reading.data.publishedDate.toISOString()}>
+							{yearFormat.format(reading.data.publishedDate)}
+						</time>
+					</dd>
+
+					<dt>Publisher</dt>
+					<dd>{reading.data.publisher}</dd>
+
+					<dt>Pages</dt>
+					<dd>{reading.data.pages}</dd>
+				</dl>
+
+				{
+					(reading.data.amazonCom || reading.data.amazonIn) && (
+						<div class="buy">
+							{reading.data.amazonCom && (
+								<a class="buy-link" href={reading.data.amazonCom} target="_blank" rel="noopener noreferrer">
+									Amazon.com
+								</a>
+							)}
+							{reading.data.amazonIn && (
+								<a class="buy-link" href={reading.data.amazonIn} target="_blank" rel="noopener noreferrer">
+									Amazon.in
+								</a>
+							)}
+						</div>
+					)
+				}
+			</div>
+		</div>
+
+		<hr class="rule" />
+
+		{
+			hasLearnings ? (
+				<div class="prose">
+					<Content />
+				</div>
+			) : (
+				<p class="in-progress">Reading in progress. Learnings to follow.</p>
+			)
+		}
+	</article>
+</PageLayout>
+
+<style>
+	.reading {
+		padding: 8px 0 80px;
+	}
+	.back {
+		display: inline-block;
+		margin-bottom: 28px;
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+		color: hsl(var(--theme-text) / 0.66);
+	}
+	.back:hover {
+		color: hsl(var(--theme-accent));
+	}
+	.reading h1 {
+		font-family: var(--font-serif);
+		font-weight: 500;
+		font-size: clamp(30px, 4.6vw, 40px);
+		letter-spacing: -0.02em;
+		line-height: 1.14;
+		color: hsl(var(--theme-text));
+		margin: 0;
+	}
+	.subtitle {
+		margin: 10px 0 0;
+		font-family: var(--font-serif);
+		font-size: clamp(17px, 2.2vw, 20px);
+		line-height: 1.4;
+		color: hsl(var(--theme-text-muted));
+	}
+	.draft-badge {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: hsl(var(--theme-accent));
+		margin-right: 8px;
+		vertical-align: 4px;
+	}
+	.book {
+		margin-top: 32px;
+		display: grid;
+		grid-template-columns: 180px 1fr;
+		gap: 32px;
+		align-items: start;
+	}
+	.cover {
+		width: 100%;
+		height: auto;
+		display: block;
+		border-radius: 4px;
+		border: 1px solid hsl(var(--theme-text) / 0.1);
+		box-shadow: 0 6px 18px hsl(var(--theme-text) / 0.12);
+	}
+	.facts {
+		margin: 0;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		column-gap: 20px;
+		row-gap: 8px;
+		align-items: baseline;
+	}
+	.facts dt {
+		font-family: var(--font-sans);
+		font-size: 12px;
+		font-weight: 500;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.55);
+	}
+	.facts dd {
+		margin: 0;
+		font-family: var(--font-serif);
+		font-size: 16.5px;
+		color: hsl(var(--theme-text));
+	}
+	.buy {
+		margin-top: 28px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+	/* Matches the social buttons on the home page, so the site keeps one
+	   button shape rather than inventing a second. */
+	.buy-link {
+		display: inline-flex;
+		align-items: center;
+		padding: 10px 14px;
+		border-radius: 10px;
+		border: 1px solid hsl(var(--theme-text) / 0.14);
+		color: hsl(var(--theme-text));
+		font-family: var(--font-serif);
+		font-size: 15px;
+		line-height: 1;
+		text-decoration: none;
+		transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+	}
+	.buy-link:hover {
+		background-color: hsl(var(--theme-text) / 0.05);
+		border-color: hsl(var(--theme-text) / 0.3);
+		color: hsl(var(--theme-link));
+	}
+	.rule {
+		margin: 48px 0 40px;
+		border: 0;
+		border-top: 1px solid var(--hairline);
+	}
+	.in-progress {
+		margin: 0;
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: 17px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+
+	@media (max-width: 720px) {
+		.book {
+			grid-template-columns: 140px 1fr;
+			gap: 24px;
+		}
+	}
+	@media (max-width: 480px) {
+		.book {
+			grid-template-columns: 1fr;
+			gap: 24px;
+		}
+		.cover {
+			max-width: 180px;
+		}
+	}
+</style>

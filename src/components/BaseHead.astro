@@ -7,13 +7,17 @@ import newsreaderLatin from "@fontsource-variable/newsreader/files/newsreader-la
 
 type Props = SiteMeta;
 
-const {articleDate, description, ogImage, title} = Astro.props;
+const {articleDate, description, ogImage, ogImageWidth, ogImageHeight, title} = Astro.props;
 
 const titleSeparator = "|";
 const siteTitle =
     title === siteConfig.title ? title : `${title} ${titleSeparator} ${siteConfig.title}`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = absoluteUrl(ogImage ? ogImage : "/social-card.png", Astro.site);
+const socialImageWidth = ogImageWidth ?? 1200;
+const socialImageHeight = ogImageHeight ?? 630;
+const twitterCard =
+    socialImageWidth >= socialImageHeight ? "summary_large_image" : "summary";
 ---
 
 <meta charset="utf-8"/>
@@ -50,10 +54,10 @@ const socialImageURL = absoluteUrl(ogImage ? ogImage : "/social-card.png", Astro
 <meta content={siteConfig.title} property="og:site_name"/>
 <meta content={siteConfig.ogLocale} property="og:locale"/>
 <meta content={socialImageURL} property="og:image"/>
-<meta content="1200" property="og:image:width"/>
-<meta content="630" property="og:image:height"/>
+<meta content={String(socialImageWidth)} property="og:image:width"/>
+<meta content={String(socialImageHeight)} property="og:image:height"/>
 
-<meta content="summary_large_image" property="twitter:card"/>
+<meta content={twitterCard} property="twitter:card"/>
 <meta content={canonicalURL} property="twitter:url"/>
 <meta content={title} property="twitter:title"/>
 <meta content={description} property="twitter:description"/>

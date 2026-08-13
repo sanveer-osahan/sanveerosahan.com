@@ -14,7 +14,11 @@ stripped to a minimal **Home + About** site. pnpm, deployed to Cloudflare Pages 
 
 - `src/site.config.ts` — site title, author, description, `menuLinks`
 - `astro.config.ts` — `site` URL, integrations (tailwind, sitemap, robots, webmanifest, compress)
+- `src/content.config.ts` — the three content collections: `articles`, `notes`, `bookshelf`
 - `src/pages/index.astro` — Home page
+- `src/pages/bookshelf/` — the shelf (`index.astro`) and one page per Reading (`[...slug].astro`)
+- `src/content/bookshelf/` — one Markdown file per Reading; body holds the chapter learnings
+- `src/assets/books/` — cover images, optimized through Astro's `image()` schema helper
 - `src/pages/about.astro` — About page
 - `src/pages/404.astro` — not-found page
 - `src/layouts/Base.astro` — global shell (BaseHead, header, footer, theme toggle, skip link)

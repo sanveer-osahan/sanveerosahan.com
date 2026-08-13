@@ -3,6 +3,7 @@ import { siteConfig } from "@/site-config";
 import { withBase } from "@/utils/path";
 import { getPublishedArticles } from "@/utils/articles";
 import { getNotes } from "@/utils/notes";
+import { getReadings } from "@/utils/readings";
 import ThemeToggle from "../ThemeToggle.astro";
 
 const wordmark = siteConfig.title;
@@ -13,17 +14,19 @@ const wordmark = siteConfig.title;
  */
 const hasArticles = (await getPublishedArticles()).length > 0;
 const hasNotes = (await getNotes()).length > 0;
+const hasReadings = (await getReadings()).length > 0;
 
 const path = Astro.url.pathname.replace(/\/$/, "");
 const articlesActive = path.endsWith("/articles");
 const notesActive = path.endsWith("/notes");
+const bookshelfActive = path.includes("/bookshelf");
 ---
 
 <header class="site-header" id="main-header">
 	<a href={withBase("/")} class="wordmark">{wordmark}</a>
 	<div class="header-right">
 		{
-			(hasArticles || hasNotes) && (
+			(hasArticles || hasNotes || hasReadings) && (
 				<nav class="nav">
 					{hasArticles && (
 						<a href={withBase("/articles/")} class:list={{ active: articlesActive }}>
@@ -33,6 +36,11 @@ const notesActive = path.endsWith("/notes");
 					{hasNotes && (
 						<a href={withBase("/notes/")} class:list={{ active: notesActive }}>
 							Notes
+						</a>
+					)}
+					{hasReadings && (
+						<a href={withBase("/bookshelf/")} class:list={{ active: bookshelfActive }}>
+							Bookshelf
 						</a>
 					)}
 				</nav>
