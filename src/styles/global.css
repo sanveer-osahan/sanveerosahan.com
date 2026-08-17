@@ -135,6 +135,17 @@ figure.diagram img {
 	margin: 0 auto;
 	border-radius: 8px;
 }
+/*
+ * A diagram drawn as inline SVG needs no theme pair: it draws itself in
+ * `currentColor`, so one drawing serves both themes.
+ */
+figure.diagram svg {
+	display: block;
+	width: 100%;
+	height: auto;
+	margin: 0 auto;
+	color: hsl(var(--theme-text));
+}
 figure.diagram figcaption {
 	font-family: var(--font-sans);
 	font-size: 14px;
