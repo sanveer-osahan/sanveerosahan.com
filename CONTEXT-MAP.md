@@ -13,6 +13,11 @@ Each Article has its own context under `docs/context/articles/<slug>.md`, named 
 Article contexts stay out of `src/content/articles/` on purpose. That directory is globbed as the published collection, so a stray `.md` there would ship as a live article. The same trap applies to `src/content/notes/`, and more sharply, because Notes have no draft flag to hide behind.
 
 - [`docs/context/articles/set-up-your-ai-coding-agent.md`](./docs/context/articles/set-up-your-ai-coding-agent.md): "Set Up your AI Coding Agent: From Premium to Free"
+- [`docs/context/articles/support-tickets-as-a-data-product.md`](./docs/context/articles/support-tickets-as-a-data-product.md): "Support Tickets as a Data Product: Building the Analysis Layer on Databricks"
+
+## Datasets
+
+- [`docs/databricks/DATA-MODEL.md`](./docs/databricks/DATA-MODEL.md): the synthetic support ticket dataset behind that article.
 
 ## Per-note
 

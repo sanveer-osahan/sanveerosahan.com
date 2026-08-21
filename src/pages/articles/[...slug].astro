@@ -25,7 +25,6 @@ const meta = {
 const dateFormat = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 	month: "long",
-	day: "numeric",
 });
 
 const readingMinutes = getReadingTime(article.body ?? "");
@@ -128,6 +127,34 @@ const readingMinutes = getReadingTime(article.body ?? "");
 		line-height: 1.25;
 		color: hsl(var(--theme-text));
 		margin: 1.5em 0 0.5em;
+	}
+	.prose :global(ul),
+	.prose :global(ol) {
+		margin: 0 0 1.1em;
+		padding-left: 1.4em;
+	}
+	.prose :global(ul) {
+		list-style: disc;
+	}
+	.prose :global(ol) {
+		list-style: decimal;
+	}
+	.prose :global(li) {
+		margin: 0 0 0.5em;
+		padding-left: 0.2em;
+	}
+	.prose :global(li::marker) {
+		color: hsl(var(--theme-text) / 0.45);
+	}
+	.prose :global(li > ul),
+	.prose :global(li > ol) {
+		margin: 0.5em 0 0;
+	}
+	.prose :global(li > p) {
+		margin: 0 0 0.5em;
+	}
+	.prose :global(li > p:last-child) {
+		margin-bottom: 0;
 	}
 	.prose :global(.table-wrap) {
 		overflow-x: auto;
@@ -337,6 +364,22 @@ const readingMinutes = getReadingTime(article.body ?? "");
 	.prose :global(a:hover) {
 		text-decoration: none;
 	}
+	/*
+	 * Markdown code blocks and inline code. Without these they inherit the
+	 * body size, which is set for serif prose and reads oversized in mono.
+	 * 13px matches the tabset panes above.
+	 */
+	.prose :global(pre) {
+		font-size: 13px;
+		line-height: 1.55;
+	}
+	.prose :global(pre code) {
+		font-size: inherit;
+	}
+	.prose :global(:not(pre) > code) {
+		font-size: 0.88em;
+	}
+
 	.prose :global(.code-block) {
 		position: relative;
 		margin: 0.35em 0 0.85em;
