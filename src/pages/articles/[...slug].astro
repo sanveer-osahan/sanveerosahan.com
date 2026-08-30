@@ -1,5 +1,6 @@
 ---
 import PageLayout from "@/layouts/Base.astro";
+import TableOfContents from "@/components/TableOfContents.astro";
 import { getReadingTime } from "@/utils/reading-time";
 import { withBase } from "@/utils/path";
 import { getPublishedArticles } from "@/utils/articles";
@@ -14,7 +15,7 @@ export async function getStaticPaths() {
 }
 
 const { article } = Astro.props;
-const { Content } = await render(article);
+const { Content, headings } = await render(article);
 
 const meta = {
 	articleDate: article.data.publishDate.toISOString(),
@@ -25,12 +26,14 @@ const meta = {
 const dateFormat = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 	month: "long",
+	day: "numeric",
 });
 
 const readingMinutes = getReadingTime(article.body ?? "");
 ---
 
-<PageLayout meta={meta}>
+<PageLayout meta={meta} wide>
+	<div class="layout">
 	<article class="article">
 		<a href={withBase("/articles/")} class="back">Articles</a>
 		<h1>
@@ -58,9 +61,30 @@ const readingMinutes = getReadingTime(article.body ?? "");
 			<Content />
 		</div>
 	</article>
+	{/* The column is drawn even when the Contents is empty, so the prose sits in
+	    the same place on every Article. */}
+	<aside class="toc-col">
+		<TableOfContents headings={headings} />
+	</aside>
+	</div>
 </PageLayout>
 
 <style>
+	.layout {
+		display: grid;
+		grid-template-columns: minmax(0, 760px) 240px;
+		gap: 56px;
+	}
+	/* TODO(mobile): the Contents is dropped rather than adapted below this
+	   width. See TODO.md. */
+	@media (max-width: 1120px) {
+		.layout {
+			display: block;
+		}
+		.toc-col {
+			display: none;
+		}
+	}
 	.article {
 		padding: 8px 0 80px;
 	}
@@ -111,6 +135,7 @@ const readingMinutes = getReadingTime(article.body ?? "");
 		margin: 0 0 1.1em;
 	}
 	.prose :global(h2) {
+		scroll-margin-top: 24px;
 		font-family: var(--font-serif);
 		font-weight: 500;
 		font-size: clamp(22px, 3vw, 27px);
@@ -120,6 +145,7 @@ const readingMinutes = getReadingTime(article.body ?? "");
 		margin: 1.8em 0 0.6em;
 	}
 	.prose :global(h3) {
+		scroll-margin-top: 24px;
 		font-family: var(--font-serif);
 		font-weight: 500;
 		font-size: clamp(18px, 2.4vw, 21px);

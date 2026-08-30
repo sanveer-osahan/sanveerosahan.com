@@ -9,10 +9,17 @@ import type { SiteMeta } from "@/types";
 
 interface Props {
 	meta: SiteMeta;
+	/*
+	 * Widens the shell to fit a second column beside the prose. Only the
+	 * Article and Reading pages set it. The prose column itself stays 760px
+	 * wide, so this moves the block off centre without changing line length.
+	 */
+	wide?: boolean;
 }
 
 const {
 	meta: { articleDate, description = siteConfig.description, ogImage, title },
+	wide = false,
 } = Astro.props;
 ---
 
@@ -23,7 +30,7 @@ const {
 	</head>
 	<body>
 		<SkipLink />
-		<div class="wrap">
+		<div class:list={["wrap", { wide }]}>
 			<Header />
 			<main id="main">
 				<slot />
@@ -39,7 +46,15 @@ const {
 			body {
 				margin: 0;
 				padding: 0;
-				overflow-x: hidden;
+				/*
+				 * `clip`, not `hidden`. Both stop the page scrolling sideways, but
+				 * `hidden` makes this element a scroll container, and a scroll
+				 * container ancestor is what a `position: sticky` descendant sticks
+				 * to. That killed the Contents column: it stuck to a box that never
+				 * scrolls, so it scrolled away with the prose. `clip` creates no
+				 * scroll container, so sticky still resolves against the viewport.
+				 */
+				overflow-x: clip;
 			}
 			body {
 				background-color: hsl(var(--theme-bg));
@@ -75,6 +90,19 @@ const {
 				flex-direction: column;
 			}
 			.wrap > main { flex: 1 0 auto; }
+			/*
+			 * 1120 = 760 prose + 56 gap + 240 Contents + 64 padding. Below it the
+			 * two columns no longer fit, so the shell drops back to the 760px
+			 * every other page uses and the Contents column is hidden.
+			 */
+			.wrap.wide {
+				max-width: 1120px;
+			}
+			@media (max-width: 1120px) {
+				.wrap.wide {
+					max-width: 760px;
+				}
+			}
 
 			@media (max-width: 720px) {
 				.wrap {

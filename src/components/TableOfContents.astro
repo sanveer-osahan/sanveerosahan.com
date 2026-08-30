@@ -1,0 +1,157 @@
+---
+/*
+ * The Contents: the on-page navigation that sits in the right column of an
+ * Article or a Reading.
+ *
+ * The entries come from the `headings` array that `render()` already returns,
+ * and Astro already stamps a matching `id` on every heading it renders. So this
+ * needs no rehype plugin and no second pass over the Markdown: the list and the
+ * anchors it points at are generated from the same source.
+ *
+ * One entry is not a table of contents, and a Reading in progress has an empty
+ * body and no headings at all, so below two entries this renders nothing. The
+ * caller still draws the column, which keeps the text column in the same place
+ * on every page.
+ */
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+	headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+
+const entries = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const show = entries.length >= 2;
+---
+
+{
+	show && (
+		<nav class="toc" aria-labelledby="toc-label">
+			<p class="toc-label" id="toc-label">
+				Contents
+			</p>
+			<ul class="toc-list">
+				{entries.map((entry) => (
+					<li class:list={["toc-item", `depth-${entry.depth}`]}>
+						<a href={`#${entry.slug}`} data-toc-link={entry.slug}>
+							{entry.text}
+						</a>
+					</li>
+				))}
+			</ul>
+		</nav>
+	)
+}
+
+<style>
+	.toc {
+		position: sticky;
+		top: 40px;
+		max-height: calc(100vh - 80px);
+		overflow-y: auto;
+		/* The hairline is the only thing separating the Contents from the prose.
+		   A box or a fill would read as a callout inside the article. */
+		border-left: 1px solid var(--hairline);
+		padding: 2px 0 2px 18px;
+	}
+	/*
+	 * Matches the uppercase `dt` labels in a Reading's facts list, so the
+	 * Contents reads as site furniture rather than a heading in the prose.
+	 */
+	.toc-label {
+		margin: 0 0 14px;
+		font-family: var(--font-sans);
+		font-size: 12px;
+		font-weight: 500;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.55);
+	}
+	.toc-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.toc-item {
+		margin: 0 0 9px;
+	}
+	.toc-item a {
+		display: block;
+		font-family: var(--font-sans);
+		font-size: 13px;
+		line-height: 1.4;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+	.toc-item a:hover {
+		color: hsl(var(--theme-text));
+	}
+	.depth-3 {
+		padding-left: 14px;
+	}
+	.depth-3 a {
+		font-size: 12.5px;
+		color: hsl(var(--theme-text) / 0.5);
+	}
+	.toc-item a[aria-current="true"] {
+		color: hsl(var(--theme-accent));
+	}
+</style>
+
+<script>
+	/*
+	 * Marks the section the reader is in. The article this was built for has
+	 * four headings all named "Setting It Up", so without an active mark the
+	 * list cannot tell you which one you are looking at.
+	 *
+	 * The observer is the trigger, not the decision. It fires exactly when a
+	 * heading crosses the line near the top of the viewport, which is the only
+	 * moment the active entry can change. The callback then measures every
+	 * heading and takes the last one above that line. Deciding from the entries
+	 * alone gets this wrong inside a section taller than the viewport, where no
+	 * heading is on screen at all.
+	 */
+	const LINE = 96;
+
+	const nav = document.querySelector<HTMLElement>(".toc");
+	const headings = Array.from(
+		document.querySelectorAll<HTMLElement>(".prose h2[id], .prose h3[id]"),
+	);
+
+	if (nav && headings.length > 0) {
+		let current: string | null = null;
+
+		const update = () => {
+			let active = headings[0];
+			for (const heading of headings) {
+				if (heading.getBoundingClientRect().top > LINE) break;
+				active = heading;
+			}
+			if (active.id === current) return;
+			current = active.id;
+
+			for (const link of nav.querySelectorAll("[data-toc-link]")) {
+				link.removeAttribute("aria-current");
+			}
+			const link = nav.querySelector<HTMLElement>(`[data-toc-link="${CSS.escape(current)}"]`);
+			if (!link) return;
+			link.setAttribute("aria-current", "true");
+
+			/*
+			 * Keep the active entry in view. This moves the nav's own scrollTop
+			 * and nothing else, so a long list never drags the page with it.
+			 */
+			const navBox = nav.getBoundingClientRect();
+			const linkBox = link.getBoundingClientRect();
+			if (linkBox.top < navBox.top || linkBox.bottom > navBox.bottom) {
+				nav.scrollTop += linkBox.top - navBox.top - navBox.height / 2 + linkBox.height / 2;
+			}
+		};
+
+		const observer = new IntersectionObserver(update, {
+			rootMargin: `-${LINE}px 0px 0px 0px`,
+			threshold: [0, 1],
+		});
+		for (const heading of headings) observer.observe(heading);
+	}
+</script>

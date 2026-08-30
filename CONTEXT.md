@@ -33,6 +33,7 @@ The site publishes three kinds of writing, and they are different types, not var
 - **Reading in progress**: a Reading with an empty body. The page shows the Book and one italic line saying the learnings are still to come. A Reading carries no status field, so this is the only way the site says a book is unfinished. Once the first chapter is written, the line is gone for good.
 - **Video companion**: an Article that has an optional `videoUrl`. The Article is the written form; the YouTube video is the paired form. An Article can exist without a video. The video does not define the Article; it is metadata on it.
 - **The wall**: the Notes page at `/notes/`. A single column of cards, newest first, showing every Note in full. The home page shows the newest three from the same wall.
+- **Contents**: the on-page navigation on an Article or a Reading, listing that page's own headings in a column to the right of the prose. Built from the headings in the Markdown, so it has no separate source to maintain. It lists `h2` and `h3` on an Article, and chapters on a Reading. It does not appear when there are fewer than two headings, which covers a Reading in progress. _Avoid_: table of contents, TOC, outline, sidebar, index.
 - **The shelf**: the Bookshelf page at `/bookshelf/`. A single-column list, newest first. Each row is a cover thumbnail and the title, with the authors under it. The home page is the exception: it shows the newest three as a row of full covers under the heading "From my bookshelf".
 
 ### Note ordering
