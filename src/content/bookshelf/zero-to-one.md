@@ -69,3 +69,35 @@ Mass-producing a typewriter and selling it in every country is horizontal progre
 My take:
 
 My answer to the contrarian question: most people think speed and quality are inversely proportional, that you trade one for the other. The truth is that they sit on the same spectrum. With practice, you can deliver quality at speed.
+
+## Chapter 2: Party like it's 1999
+
+Madness is rare in individuals - but in groups, parites, nations, and ages it is the rule.  
+Distortions caused by a bubble don't disappear when they pop.
+
+In this chapter the author walks us through the quick history of the 1990's that it was not as optimistic as we rembember it.  
+
+And Paypal's customer acquisition strategy of giving $10 to new customers for joining and $10 when they referred a friend. The customers grew at an exponential rate and so did the cost which was unsustainable. But with a large user base, Paypal had a clear path to profitability and raised funding before the dot-com crash.
+
+The lessons learned from the dot-com crash:
+
+1. Make incremental advances
+2. Stay lean and flexible
+3. Improve on the competition
+4. Focus on the product, not sales
+
+Yet the opposite principles are also correct:
+
+1. It is better to risk boldness tnah triviallity
+2. A bad plan is better than no plan
+3. Competitive markets destroy profits
+4. Sales matters just as much as product
+
+My take:
+
+I don't think the above lessons are condradicting each other. They are actually complementing. It totally depends on the current state of the business you are in which depends on the following:
+
+1. If you have a stable profitable business then you can take more risk in a different domain or market. If you have a large customer base, then incremental advances makes sense.
+2. It's better to ship fast, get feedback and iterate quickly. Avoid planning overkill, execute and learn.
+3. If there is a competition who has a revenue means the market discovery is done. Else find a niche market.
+4. Sell before you build. Improve product quality to keep the customers happy.
