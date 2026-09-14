@@ -101,3 +101,42 @@ I don't think the above lessons are contradicting each other. They are actually 
 2. It's better to ship fast, get feedback and iterate quickly. Avoid planning overkill, execute and learn.
 3. If there is a competition who has a revenue means the market discovery is done. Else find a niche market.
 4. Sell before you build. Improve product quality to keep the customers happy.
+
+## Chapter 3: All Happy Companies are different
+
+There are companies that create enormous value but capture less value for themselves - like airlines.
+There are companies that create less value but capture far more than they create - like Google.
+
+There are 2 simplified models to explain the difference - Perfect Competition and Monopolies.
+
+Competitive Lies: Non-monopolists exaggerate their distinction by defining their market as the intersection of various smaller markets.
+
+There are endless options when it comes to visiting a cafe in Mumbai. In Bandra, we have so many but one that personally stands out to me is - [Mary Lodge by Subko](https://maps.app.goo.gl/5fkfP5oCcpHbG8B5A)
+
+It's an intersection of
+
+Coffee Training ^ Co-working ^ In-house beans and bakes
+
+Monopoly Lies: Monopolists disguise their monopoly by framing their market as the union of several large markets.
+
+Zomato in public doesn't frame itself as a food delivery app even though they have a market share of 55 to 58% here.
+They claim their competition is home-cooked food, which makes the union of
+
+Food Delivery U Dining Out U Home Cooked Meals U Quick Commerce U Catering
+
+Companies in perfect competition have to focus so much on their day-to-day survival that they cannot plan for the long term.
+
+On the other hand, Creative Monopolists add more categories of abundance to the world and are powerful engines to make society better.
+
+All happy companies are different - they solve a unique problem.
+All unhappy companies are the same - they fail to escape competition.
+
+My take:
+
+If you want to build a company that is long-lasting and a giant like Apple or Google, you'll need to differentiate by creating your own market as a Creative Monopoly.
+
+I don't think everyone who's building a business will be able to achieve that.
+It all depends on your goals and ambitions as an entrepreneur.
+Those who are driven by innovation should go for this approach.
+
+I think it's fine if you want to establish your company in a perfectly competitive market where you create your own differentiation if it is sustainable.
