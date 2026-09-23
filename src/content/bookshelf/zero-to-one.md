@@ -140,3 +140,17 @@ It all depends on your goals and ambitions as an entrepreneur.
 Those who are driven by innovation should go for this approach.
 
 I think it's fine if you want to establish your company in a perfectly competitive market where you create your own differentiation if it is sustainable.
+
+## Chapter 4: The Ideology of Competition
+
+Creative Monopoly = benefit to consumers + profit to creator
+
+Competition = no meaningful differentiation for consumers + no profits + struggle for survival
+
+The rest of chapter gives various examples of how Competition kills proft and create stupid rivalries.
+
+The only learning from this chapter is that if you can't beat a rival, it may be better to merge.
+
+In 1999, PayPal and X merged to survive the Dot-Com bubble burst and build a succesful business.
+
+
