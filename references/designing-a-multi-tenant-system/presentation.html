@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  :root{color-scheme:light dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  body{margin:0;font:14px system-ui,sans-serif;background:#fafafa}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>One Product, Many Workspaces</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=Lato:ital,wght@0,400;0,700;0,900;1,400&family=Rubik:wght@400;500;600&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap">
+<style>
+  /* ============================================================
+     PAGE CHROME — neutral voice: Archivo / Source Sans 3 / IBM Plex Mono
+     ============================================================ */
+  :root{
+    --bg:#f7f4f8;
+    --surface:#ffffff;
+    --surface-2:#f1ecf3;
+    --ink:#1d1220;
+    --muted:#6b5e72;
+    --line:#e3d9e8;
+    --line-strong:#cbbcd3;
+    --accent:#4a154b;
+    --wire:#b9a7c2;
+    --slack-ink:#4a154b;
+    --gws-ink:#1a73e8;
+    --shadow:0 1px 2px rgba(29,18,32,.06), 0 8px 24px -16px rgba(29,18,32,.35);
+    --step:clamp(1.8rem, 1.2rem + 1.8vw, 3rem);
+
+    --font-display:Archivo,"Helvetica Neue",Arial,sans-serif;
+    --font-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+    --display-weight:800;
+    --name-weight:700;
+    --display-tracking:-.02em;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15101a;
+      --surface:#1f1826;
+      --surface-2:#271f30;
+      --ink:#f3edf6;
+      --muted:#a99cb2;
+      --line:#352b40;
+      --line-strong:#4a3d58;
+      --accent:#d9a7db;
+      --wire:#6d5c7a;
+      --slack-ink:#c99dca;
+      --gws-ink:#8ab4f8;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15101a;
+    --surface:#1f1826;
+    --surface-2:#271f30;
+    --ink:#f3edf6;
+    --muted:#a99cb2;
+    --line:#352b40;
+    --line-strong:#4a3d58;
+    --accent:#d9a7db;
+    --wire:#6d5c7a;
+    --slack-ink:#c99dca;
+    --gws-ink:#8ab4f8;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.55;
+    margin:0;
+  }
+  .page{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:clamp(32px,6vw,72px) 72px}
+  h1,h2,h3{
+    font-family:var(--font-display);
+    font-weight:var(--display-weight);
+    letter-spacing:var(--display-tracking);
+    text-wrap:balance;margin:0;
+  }
+  h1{font-size:clamp(2.1rem,1.4rem + 3vw,3.4rem);line-height:1.04}
+  h2{font-size:clamp(1.45rem,1.1rem + 1.1vw,2rem)}
+  h3{font-size:1.02rem;font-weight:var(--name-weight);letter-spacing:0}
+  p{margin:0}
+  em{font-style:italic}
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  }
+  header.intro{display:flex;flex-direction:column;gap:14px;max-width:62ch}
+  .lede{font-size:1.12rem;color:var(--muted);max-width:60ch}
+
+  section{margin-top:var(--step)}
+  .sec-head{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;max-width:64ch}
+  .sec-head .row{display:flex;align-items:center;gap:12px}
+  .sec-head p{color:var(--muted)}
+  .sec-head .eyebrow{margin-bottom:-2px}
+
+  /* ---- flow layout: product -> tenants ---- */
+  .flow{
+    display:grid;
+    grid-template-columns:minmax(150px,190px) 78px minmax(0,1fr);
+    align-items:center;
+  }
+  .wires{align-self:stretch;min-height:100%;display:block}
+  .wires svg{display:block;width:100%;height:100%}
+  .wires path{fill:none;stroke:var(--wire);stroke-width:2;vector-effect:non-scaling-stroke}
+  .tenants{display:flex;flex-direction:column;gap:14px;min-width:0}
+
+  .product{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    padding:18px 16px;
+    display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;
+    color:var(--ink);
+  }
+  .product .name{font-family:var(--font-display);font-weight:var(--display-weight);font-size:1.15rem;letter-spacing:var(--display-tracking)}
+  .product .kind{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+  .tenant{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px 16px;
+    min-width:0;
+    position:relative;
+    color:var(--ink);
+  }
+  .tenant::before{
+    content:"";position:absolute;left:-4px;top:50%;width:7px;height:7px;border-radius:50%;
+    background:var(--wire);transform:translateY(-50%);
+  }
+  .tenant-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .tenant-name{font-family:var(--font-display);font-weight:var(--name-weight);font-size:1.02rem}
+  .tenant-addr{font-family:var(--font-mono);font-size:.74rem;color:var(--muted);overflow-wrap:anywhere}
+
+  .users{display:flex;flex-wrap:wrap;gap:8px}
+  .user{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--surface-2);border:1px solid var(--line);
+    border-radius:999px;padding:4px 11px 4px 4px;font-size:.85rem;
+  }
+  .avatar{
+    width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+    font-family:var(--font-display);font-weight:700;font-size:.64rem;color:#fff;letter-spacing:0;
+  }
+
+  /* ---- abstract model ---- */
+  .abstract .tenant{border-style:dashed}
+  .abstract .user{background:transparent}
+
+  /* ============================================================
+     PANELS — each brand rules its own block: fonts, palette, both themes
+     ============================================================ */
+  .panel{
+    border-radius:20px;
+    padding:clamp(18px,3vw,30px);
+    border:1px solid var(--line);
+    background:var(--surface-2);
+    color:var(--ink);
+  }
+  .panel .wires path{stroke:var(--wire)}
+
+  /* ---------- SLACK: Lato, the Slack brand face ---------- */
+  .panel.slack{
+    --font-display:Lato,"Helvetica Neue",Arial,sans-serif;
+    --font-body:Lato,"Helvetica Neue",Arial,sans-serif;
+    --font-mono:Menlo,Monaco,Consolas,ui-monospace,monospace;
+    --display-weight:900;
+    --name-weight:900;
+    --display-tracking:-.015em;
+
+    --surface:#ffffff;
+    --surface-2:#f8f4f8;
+    --ink:#1d1c1d;              /* Slack's text colour */
+    --muted:#616061;
+    --line:#e6dbe6;
+    --line-strong:#cbb4cb;
+    --wire:#4a154b;
+    --accent:#4a154b;
+
+    background:#f4ede9;          /* Slack marketing sand */
+    border-color:#e0d3d9;
+    font-family:var(--font-body);
+  }
+  .panel.slack h2{font-weight:900}
+  .panel.slack .lede-brand{font-weight:400}
+  .panel.slack .tenant{border-radius:8px}     /* Slack UI corners are tight */
+  .panel.slack .product{border-radius:12px}
+  .panel.slack .user{border-radius:4px;padding-left:4px}
+  .panel.slack .avatar{border-radius:5px}     /* Slack avatars are squircles */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .panel.slack{
+      --surface:#1b0b1e;         /* near-black plum card, so it lifts off the aubergine */
+      --surface-2:#2c1530;
+      --ink:#f6eef6;
+      --muted:#c9aecb;
+      --line:#5e2a60;
+      --line-strong:#8a5a8b;
+      --wire:#e9d2ea;
+      --accent:#ecb22e;
+      background:#4a154b;        /* Slack aubergine */
+      border-color:#6b3a6c;
+    }
+  }
+  :root[data-theme="dark"] .panel.slack{
+    --surface:#1b0b1e;
+    --surface-2:#2c1530;
+    --ink:#f6eef6;
+    --muted:#c9aecb;
+    --line:#5e2a60;
+    --line-strong:#8a5a8b;
+    --wire:#e9d2ea;
+    --accent:#ecb22e;
+    background:#4a154b;
+    border-color:#6b3a6c;
+  }
+
+  /* ---------- GOOGLE WORKSPACE: Rubik + Roboto, the Google voice ---------- */
+  .panel.gws{
+    --font-display:Rubik,"Google Sans",Roboto,Arial,sans-serif;
+    --font-body:Roboto,Arial,"Helvetica Neue",sans-serif;
+    --font-mono:"Roboto Mono",ui-monospace,monospace;
+    --display-weight:500;        /* Google sets headings light, never black */
+    --name-weight:500;
+    --display-tracking:0;
+
+    --surface:#ffffff;
+    --surface-2:#f1f3f4;
+    --ink:#202124;               /* Google grey 900 */
+    --muted:#5f6368;             /* Google grey 700 */
+    --line:#dadce0;              /* Google grey 300 */
+    --line-strong:#bdc1c6;
+    --wire:#1a73e8;
+    --accent:#1a73e8;
+
+    background:#f8fafd;          /* Google surface tint */
+    border-color:#dadce0;
+    font-family:var(--font-body);
+    font-weight:400;
+  }
+  .panel.gws h2{font-weight:500}
+  .panel.gws .lede-brand{font-weight:300;font-size:1.06rem}
+  .panel.gws .tenant{border-radius:16px}      /* Material 3 corners are round */
+  .panel.gws .product{border-radius:20px}
+  .panel.gws .user{border-radius:999px}
+  .panel.gws .sub{font-weight:500;letter-spacing:.08em}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .panel.gws{
+      --surface:#2d2e31;         /* Material dark surface */
+      --surface-2:#3c4043;
+      --ink:#e8eaed;
+      --muted:#9aa0a6;
+      --line:#3c4043;
+      --line-strong:#5f6368;
+      --wire:#8ab4f8;
+      --accent:#8ab4f8;
+      background:#202124;
+      border-color:#3c4043;
+    }
+  }
+  :root[data-theme="dark"] .panel.gws{
+    --surface:#2d2e31;
+    --surface-2:#3c4043;
+    --ink:#e8eaed;
+    --muted:#9aa0a6;
+    --line:#3c4043;
+    --line-strong:#5f6368;
+    --wire:#8ab4f8;
+    --accent:#8ab4f8;
+    background:#202124;
+    border-color:#3c4043;
+  }
+
+  /* ---- shared panel parts ---- */
+  .channels{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+  .channel{
+    display:flex;align-items:center;gap:8px;font-size:.9rem;
+    font-family:var(--font-body);color:var(--muted);
+  }
+  .channel .sigil{width:14px;text-align:center;color:var(--accent);font-weight:700}
+  .channel .tag{font-family:var(--font-mono);font-size:.68rem;color:var(--line-strong)}
+  .divider{height:1px;background:var(--line);margin:12px 0}
+  .sub{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+  .apps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .app{
+    display:inline-flex;align-items:center;gap:6px;font-size:.82rem;
+    border:1px solid var(--line);border-radius:8px;padding:3px 10px 3px 8px;background:var(--surface-2);
+    font-family:var(--font-body);
+  }
+  .app .dot{width:8px;height:8px;border-radius:2px}
+  .panel.gws .app{border-radius:999px}
+
+  /* ---- mapping table ---- */
+  .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:580px}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:top;font-size:.93rem}
+  thead th{
+    font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);font-weight:500;background:var(--surface-2);
+  }
+  thead th.c-slack{color:var(--slack-ink);font-family:Lato,sans-serif;font-weight:900;letter-spacing:.08em}
+  thead th.c-gws{color:var(--gws-ink);font-family:Rubik,sans-serif;font-weight:500;letter-spacing:.08em}
+  td.c-slack{font-family:Lato,sans-serif}
+  td.c-gws{font-family:Roboto,Arial,sans-serif}
+  td.c-slack em, td.c-gws em{font-family:var(--font-mono);font-style:normal;font-size:.86em;color:var(--muted)}
+  tbody tr:last-child td{border-bottom:none}
+  td.term{font-family:var(--font-display);font-weight:var(--name-weight)}
+
+  .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:20px}
+  .note{border-left:2px solid var(--line-strong);padding:2px 0 2px 14px}
+  .note h3{margin-bottom:4px}
+  .note p{color:var(--muted);font-size:.93rem}
+
+  /* ---- theme switch ---- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap}
+  .topbar .mark{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .theme-switch{display:inline-flex;gap:2px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .theme-switch button{
+    font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);background:transparent;border:0;border-radius:999px;padding:5px 12px;cursor:pointer;
+  }
+  .theme-switch button:hover{color:var(--ink)}
+  .theme-switch button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+  .theme-switch button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  footer{margin-top:var(--step);color:var(--muted);font-size:.86rem;border-top:1px solid var(--line);padding-top:14px}
+
+  @media (max-width:680px){
+    .flow{grid-template-columns:minmax(0,1fr)}
+    .wires{display:none}
+    .product{margin-bottom:14px}
+    .tenant::before{left:50%;top:-4px;transform:translateX(-50%)}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="topbar">
+    <span class="mark">B2B · tenancy model</span>
+    <div class="theme-switch" role="group" aria-label="Page theme">
+      <button type="button" id="theme-system" data-mode="system" aria-pressed="true">System</button>
+      <button type="button" id="theme-light" data-mode="light" aria-pressed="false">Light</button>
+      <button type="button" id="theme-dark" data-mode="dark" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+
+  <header class="intro">
+    <span class="eyebrow">Business to business · B2B</span>
+    <h1>One Product, Many Workspaces</h1>
+    <p class="lede">A B2B product sells one instance of itself to each company. The company gets a
+      private tenant. The people inside it get accounts. One user never sees another company's data.</p>
+  </header>
+
+  <!-- ABSTRACT MODEL -->
+  <section class="abstract">
+    <div class="sec-head">
+      <span class="eyebrow">The shape</span>
+      <h2>The pattern</h2>
+      <p>The vendor sells to the company. The company owns the boundary. The users live inside it.</p>
+    </div>
+
+    <div class="flow">
+      <div class="product">
+        <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+          <rect x="4" y="4" width="32" height="32" rx="9" fill="none" stroke="var(--line-strong)" stroke-width="2"></rect>
+          <circle cx="20" cy="20" r="6" fill="var(--wire)"></circle>
+        </svg>
+        <span class="name">Product</span>
+        <span class="kind">One codebase</span>
+      </div>
+
+      <div class="wires" aria-hidden="true">
+        <svg viewBox="0 0 100 300" preserveAspectRatio="none">
+          <path d="M0,150 C45,150 55,50 100,50"></path>
+          <path d="M0,150 L100,150"></path>
+          <path d="M0,150 C45,150 55,250 100,250"></path>
+        </svg>
+      </div>
+
+      <div class="tenants">
+        <div class="tenant">
+          <div class="tenant-head"><span class="tenant-name">Company 1</span><span class="tenant-addr">tenant boundary</span></div>
+          <div class="users">
+            <span class="user"><span class="avatar" style="background:var(--wire)">1</span>User 1</span>
+            <span class="user"><span class="avatar" style="background:var(--wire)">2</span>User 2</span>
+            <span class="user"><span class="avatar" style="background:var(--wire)">3</span>User 3</span>
+          </div>
+        </div>
+        <div class="tenant">
+          <div class="tenant-head"><span class="tenant-name">Company 2</span><span class="tenant-addr">tenant boundary</span></div>
+          <div class="users">
+            <span class="user"><span class="avatar" style="background:var(--wire)">1</span>User 1</span>
+            <span class="user"><span class="avatar" style="background:var(--wire)">2</span>User 2</span>
+            <span class="user"><span class="avatar" style="background:var(--wire)">3</span>User 3</span>
+          </div>
+        </div>
+        <div class="tenant">
+          <div class="tenant-head"><span class="tenant-name">Company 3</span><span class="tenant-addr">tenant boundary</span></div>
+          <div class="users">
+            <span class="user"><span class="avatar" style="background:var(--wire)">1</span>User 1</span>
+            <span class="user"><span class="avatar" style="background:var(--wire)">2</span>User 2</span>
+            <span class="user"><span class="avatar" style="background:var(--wire)">3</span>User 3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLACK -->
+  <section>
+    <div class="panel slack">
+      <div class="sec-head">
+        <div class="row">
+          <svg width="30" height="30" viewBox="0 0 122 122" aria-hidden="true">
+            <rect x="35" y="4" width="26" height="57" rx="13" fill="#36c5f0"></rect>
+            <rect x="61" y="35" width="57" height="26" rx="13" fill="#2eb67d"></rect>
+            <rect x="61" y="61" width="26" height="57" rx="13" fill="#ecb22e"></rect>
+            <rect x="4" y="61" width="57" height="26" rx="13" fill="#e01e5a"></rect>
+          </svg>
+          <h2>Slack</h2>
+        </div>
+        <p class="lede-brand">Each organization gets its own workspace. Inside it, people send direct
+          messages and join public or private channels. A channel never crosses a workspace.</p>
+      </div>
+
+      <div class="flow">
+        <div class="product">
+          <svg width="40" height="40" viewBox="0 0 122 122" aria-hidden="true">
+            <rect x="35" y="4" width="26" height="57" rx="13" fill="#36c5f0"></rect>
+            <rect x="61" y="35" width="57" height="26" rx="13" fill="#2eb67d"></rect>
+            <rect x="61" y="61" width="26" height="57" rx="13" fill="#ecb22e"></rect>
+            <rect x="4" y="61" width="57" height="26" rx="13" fill="#e01e5a"></rect>
+          </svg>
+          <span class="name">Slack</span>
+          <span class="kind">One product</span>
+        </div>
+
+        <div class="wires" aria-hidden="true">
+          <svg viewBox="0 0 100 300" preserveAspectRatio="none">
+            <path d="M0,150 C45,150 55,50 100,50"></path>
+            <path d="M0,150 L100,150"></path>
+            <path d="M0,150 C45,150 55,250 100,250"></path>
+          </svg>
+        </div>
+
+        <div class="tenants">
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Acme Robotics</span><span class="tenant-addr">acme.slack.com</span></div>
+            <div class="channels">
+              <div class="channel"><span class="sigil" style="color:#2eb67d">#</span>general <span class="tag">public</span></div>
+              <div class="channel"><span class="sigil" style="color:#e01e5a">🔒</span>founders <span class="tag">private</span></div>
+              <div class="channel"><span class="sigil" style="color:#36c5f0">✉</span>Priya → Marcus <span class="tag">DM</span></div>
+            </div>
+            <div class="sub">Members</div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#e01e5a">PR</span>Priya</span>
+              <span class="user"><span class="avatar" style="background:#2eb67d">MA</span>Marcus</span>
+              <span class="user"><span class="avatar" style="background:#36c5f0">LI</span>Lin</span>
+            </div>
+          </div>
+
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Bluefin Bank</span><span class="tenant-addr">bluefin.slack.com</span></div>
+            <div class="channels">
+              <div class="channel"><span class="sigil" style="color:#2eb67d">#</span>trading-desk <span class="tag">public</span></div>
+              <div class="channel"><span class="sigil" style="color:#e01e5a">🔒</span>risk-review <span class="tag">private</span></div>
+              <div class="channel"><span class="sigil" style="color:#36c5f0">✉</span>Ana → Tomas <span class="tag">DM</span></div>
+            </div>
+            <div class="sub">Members</div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#ecb22e">AN</span>Ana</span>
+              <span class="user"><span class="avatar" style="background:#611f69">TO</span>Tomas</span>
+              <span class="user"><span class="avatar" style="background:#2eb67d">RU</span>Ruth</span>
+            </div>
+          </div>
+
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Cedar Schools</span><span class="tenant-addr">cedar.slack.com</span></div>
+            <div class="channels">
+              <div class="channel"><span class="sigil" style="color:#2eb67d">#</span>staff-room <span class="tag">public</span></div>
+              <div class="channel"><span class="sigil" style="color:#e01e5a">🔒</span>admissions <span class="tag">private</span></div>
+              <div class="channel"><span class="sigil" style="color:#36c5f0">✉</span>Sam → Noor <span class="tag">DM</span></div>
+            </div>
+            <div class="sub">Members</div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#36c5f0">SA</span>Sam</span>
+              <span class="user"><span class="avatar" style="background:#e01e5a">NO</span>Noor</span>
+              <span class="user"><span class="avatar" style="background:#ecb22e">DA</span>Dara</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GOOGLE WORKSPACE -->
+  <section>
+    <div class="panel gws">
+      <div class="sec-head">
+        <div class="row">
+          <svg width="30" height="30" viewBox="0 0 100 100" aria-hidden="true">
+            <g fill="none" stroke-width="16">
+              <path d="M22.6 22.6 A 32 32 0 0 1 79 36.5" stroke="#ea4335"></path>
+              <path d="M79 63.5 A 32 32 0 0 1 24.5 75" stroke="#34a853"></path>
+              <path d="M24.5 75 A 32 32 0 0 1 22.6 22.6" stroke="#fbbc04"></path>
+            </g>
+            <path d="M50 42 H 84 V 58 H 50 Z" fill="#4285f4"></path>
+            <path d="M74 32 A 32 32 0 0 1 82 46" fill="none" stroke="#4285f4" stroke-width="16"></path>
+          </svg>
+          <h2>Google Workspace</h2>
+        </div>
+        <p class="lede-brand">Each organization gets its own domain. The admin creates accounts on
+          that domain. The people share mail, calendars, Drive files, Docs, Sheets and Slides inside it.</p>
+      </div>
+
+      <div class="flow">
+        <div class="product">
+          <svg width="40" height="40" viewBox="0 0 100 100" aria-hidden="true">
+            <g fill="none" stroke-width="16">
+              <path d="M22.6 22.6 A 32 32 0 0 1 79 36.5" stroke="#ea4335"></path>
+              <path d="M79 63.5 A 32 32 0 0 1 24.5 75" stroke="#34a853"></path>
+              <path d="M24.5 75 A 32 32 0 0 1 22.6 22.6" stroke="#fbbc04"></path>
+            </g>
+            <path d="M50 42 H 84 V 58 H 50 Z" fill="#4285f4"></path>
+            <path d="M74 32 A 32 32 0 0 1 82 46" fill="none" stroke="#4285f4" stroke-width="16"></path>
+          </svg>
+          <span class="name">Workspace</span>
+          <span class="kind">One product</span>
+        </div>
+
+        <div class="wires" aria-hidden="true">
+          <svg viewBox="0 0 100 300" preserveAspectRatio="none">
+            <path d="M0,150 C45,150 55,50 100,50"></path>
+            <path d="M0,150 L100,150"></path>
+            <path d="M0,150 C45,150 55,250 100,250"></path>
+          </svg>
+        </div>
+
+        <div class="tenants">
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Acme Robotics</span><span class="tenant-addr">@acmerobotics.com</span></div>
+            <div class="sub">Shared inside the domain</div>
+            <div class="apps">
+              <span class="app"><span class="dot" style="background:#ea4335"></span>Gmail</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Calendar</span>
+              <span class="app"><span class="dot" style="background:#fbbc04"></span>Drive</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Docs</span>
+              <span class="app"><span class="dot" style="background:#34a853"></span>Sheets</span>
+              <span class="app"><span class="dot" style="background:#fbbc04"></span>Slides</span>
+            </div>
+            <div class="divider"></div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#ea4335">PR</span>priya@acmerobotics.com</span>
+              <span class="user"><span class="avatar" style="background:#34a853">MA</span>marcus@acmerobotics.com</span>
+            </div>
+          </div>
+
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Bluefin Bank</span><span class="tenant-addr">@bluefinbank.com</span></div>
+            <div class="sub">Shared inside the domain</div>
+            <div class="apps">
+              <span class="app"><span class="dot" style="background:#ea4335"></span>Gmail</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Calendar</span>
+              <span class="app"><span class="dot" style="background:#fbbc04"></span>Drive</span>
+              <span class="app"><span class="dot" style="background:#34a853"></span>Sheets</span>
+            </div>
+            <div class="divider"></div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#4285f4">AN</span>ana@bluefinbank.com</span>
+              <span class="user"><span class="avatar" style="background:#fbbc04">TO</span>tomas@bluefinbank.com</span>
+            </div>
+          </div>
+
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Cedar Schools</span><span class="tenant-addr">@cedarschools.org</span></div>
+            <div class="sub">Shared inside the domain</div>
+            <div class="apps">
+              <span class="app"><span class="dot" style="background:#ea4335"></span>Gmail</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Calendar</span>
+              <span class="app"><span class="dot" style="background:#fbbc04"></span>Drive</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Docs</span>
+            </div>
+            <div class="divider"></div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#34a853">SA</span>sam@cedarschools.org</span>
+              <span class="user"><span class="avatar" style="background:#ea4335">NO</span>noor@cedarschools.org</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAPPING -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Side by side</span>
+      <h2>The same three layers</h2>
+      <p>Both examples use one product, one tenant per company, and many users per tenant. Only the
+        names change.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Layer</th><th class="c-slack">Slack</th><th class="c-gws">Google Workspace</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="term">Product</td>
+            <td class="c-slack">Slack, sold to the company</td>
+            <td class="c-gws">Google Workspace, sold to the company</td>
+          </tr>
+          <tr>
+            <td class="term">Tenant</td>
+            <td class="c-slack">A workspace, at <em>acme.slack.com</em></td>
+            <td class="c-gws">A domain, at <em>acmerobotics.com</em></td>
+          </tr>
+          <tr>
+            <td class="term">User</td>
+            <td class="c-slack">A member account in that workspace</td>
+            <td class="c-gws">A mailbox on that domain</td>
+          </tr>
+          <tr>
+            <td class="term">What users share</td>
+            <td class="c-slack">Public channels, private channels, direct messages</td>
+            <td class="c-gws">Mail, calendars, Drive, Docs, Sheets, Slides</td>
+          </tr>
+          <tr>
+            <td class="term">Who pays</td>
+            <td class="c-slack">The company, per member seat</td>
+            <td class="c-gws">The company, per user account</td>
+          </tr>
+          <tr>
+            <td class="term">Who controls access</td>
+            <td class="c-slack">The workspace admin</td>
+            <td class="c-gws">The domain admin</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="notes">
+      <div class="note">
+        <h3>The company is the customer</h3>
+        <p>The contract sits with the company, not with the person who logs in. One sale brings many users.</p>
+      </div>
+      <div class="note">
+        <h3>The tenant is the wall</h3>
+        <p>Data, search and permissions stop at the tenant edge. Acme cannot read a Bluefin channel or file.</p>
+      </div>
+      <div class="note">
+        <h3>An admin sits in the middle</h3>
+        <p>The admin adds people, removes them and sets the rules. The vendor does not do this per user.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Company names, people and addresses on this page are examples. They are not real accounts.
+    Slack and Google Workspace are products of their owners; this page only explains the model.
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var buttons = Array.prototype.slice.call(document.querySelectorAll('.theme-switch button'));
+    function apply(mode) {
+      if (mode === 'system') { root.removeAttribute('data-theme'); }
+      else { root.setAttribute('data-theme', mode); }
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
+      });
+      try { localStorage.setItem('b2b-theme', mode); } catch (e) {}
+    }
+    var saved = 'system';
+    try { saved = localStorage.getItem('b2b-theme') || 'system'; } catch (e) {}
+    if (['system', 'light', 'dark'].indexOf(saved) === -1) { saved = 'system'; }
+    apply(saved);
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { apply(b.dataset.mode); });
+    });
+  })();
+</script>
+</body>
+</html>
