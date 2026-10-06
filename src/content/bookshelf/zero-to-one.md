@@ -147,10 +147,62 @@ Creative Monopoly = benefit to consumers + profit to creator
 
 Competition = no meaningful differentiation for consumers + no profits + struggle for survival
 
-The rest of chapter gives various examples of how Competition kills proft and create stupid rivalries.
+The rest of chapter gives various examples of how Competition kills profit and creates stupid rivalries.
 
 The only learning from this chapter is that if you can't beat a rival, it may be better to merge.
 
-In 1999, PayPal and X merged to survive the Dot-Com bubble burst and build a succesful business.
+In 1999, PayPal and X merged to survive the Dot-Com bubble burst and build a successful business.
 
+## Chapter 5: Last Mover Advantage
 
+A great business is defined by its ability to build cash flows in the future.
+Being the first mover doesn't do you any good if someone else comes along and unseats you.
+It's better to be the last mover by making the last great development in a specific market and reaping monopoly profits.
+
+Tech companies often lose money for the first few years; it takes around 10 - 15 years to build valuable things, and that means delayed revenue.
+
+For a company to be valuable, it must grow and endure. Numbers like weekly active users, monthly revenue targets, and quarterly earnings reports are easy to measure for short-term growth, but they don't ensure durability.
+
+### Characteristics of Monopoly:
+
+1. Proprietary Technology
+
+Makes your product difficult or impossible to replicate.
+Rule of thumb - must be at least 10x better than its closest substitute in some important dimension.
+Examples - Google's Search Algorithm, Apple's iPad over other tablet computing at that time.
+
+2. Network Effects
+
+Makes a product more useful as more people use it.
+Product should be valuable to its very first users.
+Must start with small markets.
+Example - Facebook starting with just Harvard students.
+
+3. Economies of Scale
+
+A business gets stronger as it gets bigger.
+Software startups can enjoy dramatic economies of scale as the marginal cost of producing another copy of the product is close to zero.
+
+4. Branding
+
+Apple - there is no need to say anything more here.
+But branding doesn't work without a strong underlying substance.
+Beginning with brand rather than substance is dangerous.
+No tech company can be built on branding alone.
+
+### Building a Monopoly
+
+1. Start Small and Monopolize
+
+A perfect target market for a startup is a small group of concentrated users served by few or no competitors.
+In theory, it looks easy to capture 1% of a $100 billion market, but in practice, because of competition, there is no good starting point and that 1% is hard to reach.
+
+2. Scaling Up
+
+Create and dominate a niche market, then gradually expand into adjacent markets.
+Example - Amazon started with books and expanded to CDs, videos, and continued to add categories gradually until it had become the world's general store.
+
+3. Don't Disrupt
+
+Startups obsess over disrupting the business of incumbent companies, so they see themselves through the lens of the older company.
+But the act of creation is far more important to become a monopoly.
