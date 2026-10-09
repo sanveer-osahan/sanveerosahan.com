@@ -206,3 +206,59 @@ Example - Amazon started with books and expanded to CDs, videos, and continued t
 
 Startups obsess over disrupting the business of incumbent companies, so they see themselves through the lens of the older company.
 But the act of creation is far more important to become a monopoly.
+
+## Chapter 6: You are not a Lottery Ticket
+
+Does success come from luck or skill?
+
+Make your own luck by working hard.
+Luck is in the past tense. Far more important is the future.
+
+You can expect the future to be either better or worse than the present.
+There are 4 views:
+
+<figure class="diagram">
+<svg viewBox="0 0 700 470" role="img" aria-labelledby="future-views-title" style="font-family: var(--font-sans)">
+<title id="future-views-title">Four views of the future, laid out as definite or indefinite against optimistic or pessimistic. Definite optimism is the US of the 1950s and 1960s, which believed the future would be better if they planned and worked to make it better. Indefinite optimism is the US from 1982 to the present, which believes the future will be better but does not know how. Definite pessimism is China today, which prepares for a bleak future. Indefinite pessimism is Europe today, which reacts to events as they happen and hopes things do not get worse. Savings rise toward pessimism; investment rises toward definiteness.</title>
+<defs>
+<marker id="future-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+</marker>
+</defs>
+<text x="230" y="68" text-anchor="middle" font-size="15" fill="currentColor">Definite</text>
+<text x="442" y="68" text-anchor="middle" font-size="15" fill="currentColor">Indefinite</text>
+<text x="112" y="149" text-anchor="end" font-size="15" fill="currentColor">Optimistic</text>
+<text x="112" y="279" text-anchor="end" font-size="15" fill="currentColor">Pessimistic</text>
+<rect x="124" y="84" width="212" height="130" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5" />
+<rect x="336" y="84" width="212" height="130" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5" />
+<rect x="124" y="214" width="212" height="130" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5" />
+<rect x="336" y="214" width="212" height="130" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5" />
+<text x="138" y="114" font-size="14" fill="currentColor">US, 1950s - 1960s</text>
+<text x="138" y="138" font-size="13" fill="currentColor" opacity="0.72">Believe the future will be</text>
+<text x="138" y="157" font-size="13" fill="currentColor" opacity="0.72">better than the present if</text>
+<text x="138" y="176" font-size="13" fill="currentColor" opacity="0.72">they plan and work to make</text>
+<text x="138" y="195" font-size="13" fill="currentColor" opacity="0.72">it better</text>
+<text x="350" y="114" font-size="14" fill="currentColor">US, 1982 - present</text>
+<text x="350" y="138" font-size="13" fill="currentColor" opacity="0.72">Believe the future will be</text>
+<text x="350" y="157" font-size="13" fill="currentColor" opacity="0.72">better but don't know how.</text>
+<text x="138" y="244" font-size="14" fill="currentColor">China, present</text>
+<text x="138" y="268" font-size="13" fill="currentColor" opacity="0.72">Prepare for the bleak</text>
+<text x="138" y="287" font-size="13" fill="currentColor" opacity="0.72">future</text>
+<text x="350" y="244" font-size="14" fill="currentColor">Europe, present</text>
+<text x="350" y="268" font-size="13" fill="currentColor" opacity="0.72">React to events as they</text>
+<text x="350" y="287" font-size="13" fill="currentColor" opacity="0.72">happen and hope things</text>
+<text x="350" y="306" font-size="13" fill="currentColor" opacity="0.72">don't get worse.</text>
+<text x="600" y="70" text-anchor="middle" font-size="15" fill="currentColor">Savings</text>
+<line x1="600" y1="100" x2="600" y2="344" stroke="currentColor" stroke-width="1.5" marker-end="url(#future-arrow)" />
+<text x="612" y="118" font-size="13" fill="currentColor" opacity="0.72">low</text>
+<text x="612" y="340" font-size="13" fill="currentColor" opacity="0.72">high</text>
+<line x1="548" y1="390" x2="124" y2="390" stroke="currentColor" stroke-width="1.5" marker-end="url(#future-arrow)" />
+<text x="548" y="412" text-anchor="end" font-size="13" fill="currentColor" opacity="0.72">low</text>
+<text x="124" y="412" font-size="13" fill="currentColor" opacity="0.72">high</text>
+<text x="336" y="444" text-anchor="middle" font-size="15" fill="currentColor">Investments</text>
+</svg>
+<figcaption>Four views of the future.</figcaption>
+</figure>
+
+For startups, what works best is Definite Optimism.
+A business will not succeed or even go from 0 -> 1 without a bold plan to make it happen.
