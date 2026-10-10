@@ -11,6 +11,14 @@ export default defineConfig({
 	build: {
 		inlineStylesheets: "always",
 	},
+	markdown: {
+		// Two themes, no default color: Shiki writes both palettes as CSS
+		// variables on every token, and global.css picks one by `data-theme`.
+		shikiConfig: {
+			themes: { dark: "github-dark-dimmed", light: "github-light" },
+			defaultColor: false,
+		},
+	},
 	integrations: [
 		tailwind({
 			applyBaseStyles: false,

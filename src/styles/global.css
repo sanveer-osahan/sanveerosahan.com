@@ -452,3 +452,30 @@ ul.work-list a:focus-visible {
 		scroll-behavior: auto !important;
 	}
 }
+
+/* Markdown code blocks. Shiki writes `--shiki-light*` and `--shiki-dark*` on
+   every token (see `shikiConfig` in astro.config.ts), so one block serves both
+   themes. The block keeps the site's own paper surface; only the token colors
+   come from the Shiki theme. */
+.astro-code {
+	background: var(--accent-soft);
+	border: 1px solid var(--hairline);
+	border-radius: 6px;
+	padding: 10px 12px;
+	overflow-x: auto;
+	font-family: var(--font-mono);
+}
+.astro-code,
+.astro-code span {
+	color: var(--shiki-light);
+	font-style: var(--shiki-light-font-style);
+	font-weight: var(--shiki-light-font-weight);
+	text-decoration: var(--shiki-light-text-decoration);
+}
+:root[data-theme="dark"] .astro-code,
+:root[data-theme="dark"] .astro-code span {
+	color: var(--shiki-dark);
+	font-style: var(--shiki-dark-font-style);
+	font-weight: var(--shiki-dark-font-weight);
+	text-decoration: var(--shiki-dark-text-decoration);
+}
