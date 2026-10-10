@@ -1,0 +1,318 @@
+<!--
+  worked-examples — the Slack and Google Workspace panels, as the presentation draws them.
+  SINGLE SOURCE: references/designing-a-multi-tenant-system/presentation.html
+  Do not edit this copy. Edit the presentation, then run:
+    python3 references/designing-a-multi-tenant-system/components/worked-examples.gen.py
+    python3 references/designing-a-multi-tenant-system/components/sync.py
+-->
+<figure class="diagram diagram-worked">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Lato:wght@400;700;900&family=Rubik:wght@400;500;600&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap");
+.diagram-worked{margin:34px 0;display:flex;flex-direction:column;gap:28px;font-size:16px;line-height:1.55}
+.diagram-worked svg.sprite{position:absolute;width:0;height:0;overflow:hidden}
+.diagram-worked .mark{display:block;flex:none;width:auto;height:auto;margin:0}
+.diagram-worked .sec-head{margin-bottom:20px}
+/* The article styles every h2 in the prose. These rules outrank it, so the
+   brand mark and the name sit on one line the way the presentation draws them. */
+.diagram-worked .sec-head .row{display:flex;align-items:center;gap:12px}
+.diagram-worked .sec-head .row h2{font-family:var(--font-display);letter-spacing:var(--display-tracking);font-size:clamp(22px,3vw,27px);line-height:1.2;color:var(--ink);margin:0;scroll-margin-top:0}
+.diagram-worked{--bg:#f6f1e6;
+    --surface:#fbf6ec;
+    --surface-2:#efe7d6;
+    --ink:#25201b;
+    --muted:#4a4239;
+    --line:#d9cfb9;
+    --line-strong:#b8ad9b;
+    --accent:#8a4423;
+    --wire:#b8ad9b;
+    --theme-text:28deg 16% 13%;   
+    --slack-ink:#4a154b;
+    --gws-ink:#1a73e8;
+    --shadow:0 1px 2px rgba(37,32,27,.06), 0 8px 24px -16px rgba(37,32,27,.35);
+    --step:clamp(1.8rem, 1.2rem + 1.8vw, 3rem);
+    --font-display:"Newsreader","Iowan Old Style",Georgia,serif;
+    --font-body:"Newsreader","Iowan Old Style",Georgia,serif;
+    --font-sans:"Inter",-apple-system,system-ui,sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,monospace;
+    --display-weight:500;
+    --name-weight:600;
+    --display-tracking:-.015em;}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .diagram-worked{--bg:#131110;
+      --surface:#1a1715;
+      --surface-2:#221e1a;
+      --ink:#f4f0e3;
+      --muted:#c8c1ae;
+      --line:#2a2622;
+      --line-strong:#4f4a42;
+      --accent:#c89761;
+      --wire:#4f4a42;
+      --theme-text:42deg 35% 92%;
+      --slack-ink:#c99dca;
+      --gws-ink:#8ab4f8;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);}}:root[data-theme="dark"] .diagram-worked{--bg:#131110;
+    --surface:#1a1715;
+    --surface-2:#221e1a;
+    --ink:#f4f0e3;
+    --muted:#c8c1ae;
+    --line:#2a2622;
+    --line-strong:#4f4a42;
+    --accent:#c89761;
+    --wire:#4f4a42;
+    --theme-text:42deg 35% 92%;
+    --slack-ink:#c99dca;
+    --gws-ink:#8ab4f8;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);}.diagram-worked svg.sprite{position:absolute;width:0;height:0;overflow:hidden}.diagram-worked .mark{display:block;flex:none}.diagram-worked h2,.diagram-worked h3{font-family:var(--font-display);
+    font-weight:var(--display-weight);
+    letter-spacing:var(--display-tracking);
+    text-wrap:balance;margin:0;}.diagram-worked h2{font-size:clamp(22px,3vw,27px);line-height:1.2}.diagram-worked h3{font-size:clamp(18px,2.4vw,21px);line-height:1.25;letter-spacing:-.012em}.diagram-worked .sec-title{margin-top:var(--step)}.diagram-worked .sub-title{margin-top:calc(var(--step) / 2)}.diagram-worked .doc-head{margin-bottom:var(--step)}.diagram-worked .doc-head h1{margin:0}.diagram-worked .draft-badge{font-family:var(--font-sans);font-size:.42em;font-weight:600;
+    letter-spacing:.02em;color:var(--accent);margin-right:10px;vertical-align:middle;}.diagram-worked .sec-head{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;max-width:64ch}.diagram-worked .sec-head .row{display:flex;align-items:center;gap:12px}.diagram-worked .sec-head .eyebrow{margin-bottom:-2px}.diagram-worked .flow{display:grid;
+    grid-template-columns:minmax(150px,190px) 78px minmax(0,1fr);
+    align-items:center;}.diagram-worked .wires{align-self:stretch;min-height:100%;display:block}.diagram-worked .wires svg{display:block;width:100%;height:100%}.diagram-worked .wires path{fill:none;stroke:var(--wire);stroke-width:2;vector-effect:non-scaling-stroke}.diagram-worked .tenants{display:flex;flex-direction:column;gap:14px;min-width:0}.diagram-worked .product{background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    padding:18px 16px;
+    display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;
+    color:var(--ink);}.diagram-worked .product .name{font-family:var(--font-display);font-weight:var(--display-weight);font-size:1.15rem;letter-spacing:var(--display-tracking)}.diagram-worked .product .kind{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.diagram-worked .tenant{background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px 16px;
+    min-width:0;
+    position:relative;
+    color:var(--ink);}.diagram-worked .tenant::before{content:"";position:absolute;left:-4px;top:50%;width:7px;height:7px;border-radius:50%;
+    background:var(--wire);transform:translateY(-50%);}.diagram-worked .tenant-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.diagram-worked .tenant-name{font-family:var(--font-display);font-weight:var(--name-weight);font-size:1.02rem}.diagram-worked .tenant-addr{font-family:var(--font-mono);font-size:.74rem;color:var(--muted);overflow-wrap:anywhere}.diagram-worked .users{display:flex;flex-wrap:wrap;gap:8px}.diagram-worked .user{display:inline-flex;align-items:center;gap:7px;
+    background:var(--surface-2);border:1px solid var(--line);
+    border-radius:999px;padding:4px 11px 4px 4px;font-size:.85rem;}.diagram-worked .avatar{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+    font-family:var(--font-display);font-weight:700;font-size:.64rem;color:#fff;letter-spacing:0;}.diagram-worked .scope{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.diagram-worked .scope-card{position:relative;
+    display:flex;flex-direction:column;min-width:0;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-top:3px solid var(--accent);
+    border-radius:3px;
+    padding:22px 22px 16px;
+    box-shadow:0 2px 6px -3px hsl(var(--theme-text) / .18);}.diagram-worked .scope-name,.diagram-worked .scope-out-name{font-family:var(--font-display);
+    font-weight:var(--display-weight);
+    letter-spacing:var(--display-tracking);
+    font-size:1.06rem;color:var(--ink);margin:0 0 14px;}.diagram-worked .scope-card ul{font-family:var(--font-body);color:var(--muted);
+    margin:0;padding:0;list-style:none;
+    display:flex;flex-direction:column;gap:10px;}.diagram-worked .scope-card > ul{margin-bottom:18px}.diagram-worked .scope-card li{position:relative;padding-left:18px;line-height:1.5}.diagram-worked .scope-card li::before{content:"";position:absolute;left:0;top:.62em;
+    width:5px;height:5px;border-radius:50%;background:hsl(var(--theme-text) / .35);}.diagram-worked .scope-out{margin-top:auto;padding-top:18px;
+    border-top:1px solid var(--line);}.diagram-worked .scope-card .scope-out-name{margin-top:0}@media (max-width:760px){.diagram-worked .scope{grid-template-columns:1fr}}.diagram-worked .panel{border-radius:20px;
+    padding:clamp(18px,3vw,30px);
+    border:1px solid var(--line);
+    background:var(--surface-2);
+    color:var(--ink);}.diagram-worked .panel .wires path{stroke:var(--wire)}.diagram-worked .panel.slack{--font-display:Lato,"Helvetica Neue",Arial,sans-serif;
+    --font-body:Lato,"Helvetica Neue",Arial,sans-serif;
+    --font-mono:Menlo,Monaco,Consolas,ui-monospace,monospace;
+    --display-weight:900;
+    --name-weight:900;
+    --display-tracking:-.015em;
+    --surface:#ffffff;
+    --surface-2:#f8f4f8;
+    --ink:#1d1c1d;              
+    --muted:#616061;
+    --line:#e6dbe6;
+    --line-strong:#cbb4cb;
+    --wire:#4a154b;
+    --accent:#4a154b;
+    background:#f4ede9;          
+    border-color:#e0d3d9;
+    font-family:var(--font-body);}.diagram-worked .panel.slack h2{font-weight:900}.diagram-worked .panel.slack .tenant{border-radius:8px}.diagram-worked .panel.slack .product{border-radius:12px}.diagram-worked .panel.slack .user{border-radius:4px;padding-left:4px}.diagram-worked .panel.slack .avatar{border-radius:5px}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .diagram-worked .panel.slack{--surface:#1b0b1e;         
+      --surface-2:#2c1530;
+      --ink:#f6eef6;
+      --muted:#c9aecb;
+      --line:#5e2a60;
+      --line-strong:#8a5a8b;
+      --wire:#e9d2ea;
+      --accent:#ecb22e;
+      background:#4a154b;        
+      border-color:#6b3a6c;}}:root[data-theme="dark"] .diagram-worked .panel.slack{--surface:#1b0b1e;
+    --surface-2:#2c1530;
+    --ink:#f6eef6;
+    --muted:#c9aecb;
+    --line:#5e2a60;
+    --line-strong:#8a5a8b;
+    --wire:#e9d2ea;
+    --accent:#ecb22e;
+    background:#4a154b;
+    border-color:#6b3a6c;}.diagram-worked .panel.gws{--font-display:Rubik,"Google Sans",Roboto,Arial,sans-serif;
+    --font-body:Roboto,Arial,"Helvetica Neue",sans-serif;
+    --font-mono:"Roboto Mono",ui-monospace,monospace;
+    --display-weight:500;        
+    --name-weight:500;
+    --display-tracking:0;
+    --surface:#ffffff;
+    --surface-2:#f1f3f4;
+    --ink:#202124;               
+    --muted:#5f6368;             
+    --line:#dadce0;              
+    --line-strong:#bdc1c6;
+    --wire:#1a73e8;
+    --accent:#1a73e8;
+    background:#f8fafd;          
+    border-color:#dadce0;
+    font-family:var(--font-body);
+    font-weight:400;}.diagram-worked .panel.gws h2{font-weight:500}.diagram-worked .panel.gws .tenant{border-radius:16px}.diagram-worked .panel.gws .product{border-radius:20px}.diagram-worked .panel.gws .user{border-radius:999px}.diagram-worked .panel.gws .sub{font-weight:500;letter-spacing:.08em}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .diagram-worked .panel.gws{--surface:#2d2e31;         
+      --surface-2:#3c4043;
+      --ink:#e8eaed;
+      --muted:#9aa0a6;
+      --line:#3c4043;
+      --line-strong:#5f6368;
+      --wire:#8ab4f8;
+      --accent:#8ab4f8;
+      background:#202124;
+      border-color:#3c4043;}}:root[data-theme="dark"] .diagram-worked .panel.gws{--surface:#2d2e31;
+    --surface-2:#3c4043;
+    --ink:#e8eaed;
+    --muted:#9aa0a6;
+    --line:#3c4043;
+    --line-strong:#5f6368;
+    --wire:#8ab4f8;
+    --accent:#8ab4f8;
+    background:#202124;
+    border-color:#3c4043;}.diagram-worked .channels{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}.diagram-worked .channel{display:flex;align-items:center;gap:8px;font-size:.9rem;
+    font-family:var(--font-body);color:var(--muted);}.diagram-worked .channel .sigil{width:14px;text-align:center;color:var(--accent);font-weight:700}.diagram-worked .channel .tag{font-family:var(--font-mono);font-size:.68rem;color:var(--line-strong)}.diagram-worked .divider{height:1px;background:var(--line);margin:12px 0}.diagram-worked .sub{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}.diagram-worked .apps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.diagram-worked .app{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;
+    border:1px solid var(--line);border-radius:8px;padding:3px 10px 3px 8px;background:var(--surface-2);
+    font-family:var(--font-body);}.diagram-worked .app .dot{width:8px;height:8px;border-radius:2px}.diagram-worked .panel.gws .app{border-radius:999px}@media (max-width:680px){.diagram-worked .flow{grid-template-columns:minmax(0,1fr)}.diagram-worked .wires{display:none}.diagram-worked .product{margin-bottom:14px}.diagram-worked .tenant::before{left:50%;top:-4px;transform:translateX(-50%)}}
+</style>
+<svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0">
+    <symbol id="we-mark-slack" viewBox="0 0 2447.6 2452.5"><g clip-rule="evenodd" fill-rule="evenodd"> <path d="m897.4 0c-135.3.1-244.8 109.9-244.7 245.2-.1 135.3 109.5 245.1 244.8 245.2h244.8v-245.1c.1-135.3-109.5-245.1-244.9-245.3.1 0 .1 0 0 0m0 654h-652.6c-135.3.1-244.9 109.9-244.8 245.2-.2 135.3 109.4 245.1 244.7 245.3h652.7c135.3-.1 244.9-109.9 244.8-245.2.1-135.4-109.5-245.2-244.8-245.3z" fill="#36c5f0" /> <path d="m2447.6 899.2c.1-135.3-109.5-245.1-244.8-245.2-135.3.1-244.9 109.9-244.8 245.2v245.3h244.8c135.3-.1 244.9-109.9 244.8-245.3zm-652.7 0v-654c.1-135.2-109.4-245-244.7-245.2-135.3.1-244.9 109.9-244.8 245.2v654c-.2 135.3 109.4 245.1 244.7 245.3 135.3-.1 244.9-109.9 244.8-245.3z" fill="#2eb67d" /> <path d="m1550.1 2452.5c135.3-.1 244.9-109.9 244.8-245.2.1-135.3-109.5-245.1-244.8-245.2h-244.8v245.2c-.1 135.2 109.5 245 244.8 245.2zm0-654.1h652.7c135.3-.1 244.9-109.9 244.8-245.2.2-135.3-109.4-245.1-244.7-245.3h-652.7c-135.3.1-244.9 109.9-244.8 245.2-.1 135.4 109.4 245.2 244.7 245.3z" fill="#ecb22e" /> <path d="m0 1553.2c-.1 135.3 109.5 245.1 244.8 245.2 135.3-.1 244.9-109.9 244.8-245.2v-245.2h-244.8c-135.3.1-244.9 109.9-244.8 245.2zm652.7 0v654c-.2 135.3 109.4 245.1 244.7 245.3 135.3-.1 244.9-109.9 244.8-245.2v-653.9c.2-135.3-109.4-245.1-244.7-245.3-135.4 0-244.9 109.8-244.8 245.1 0 0 0 .1 0 0" fill="#e01e5a" /> </g></symbol>
+    <symbol id="we-mark-gws" viewBox="0 0 268.152 273.883"><defs><linearGradient id="we-gw-a"><stop offset="0" stop-color="#0fbc5c"/><stop offset="1" stop-color="#0cba65"/></linearGradient><linearGradient id="we-gw-g"><stop offset=".231" stop-color="#0fbc5f"/><stop offset=".312" stop-color="#0fbc5f"/><stop offset=".366" stop-color="#0fbc5e"/><stop offset=".458" stop-color="#0fbc5d"/><stop offset=".54" stop-color="#12bc58"/><stop offset=".699" stop-color="#28bf3c"/><stop offset=".771" stop-color="#38c02b"/><stop offset=".861" stop-color="#52c218"/><stop offset=".915" stop-color="#67c30f"/><stop offset="1" stop-color="#86c504"/></linearGradient><linearGradient id="we-gw-h"><stop offset=".142" stop-color="#1abd4d"/><stop offset=".248" stop-color="#6ec30d"/><stop offset=".312" stop-color="#8ac502"/><stop offset=".366" stop-color="#a2c600"/><stop offset=".446" stop-color="#c8c903"/><stop offset=".54" stop-color="#ebcb03"/><stop offset=".616" stop-color="#f7cd07"/><stop offset=".699" stop-color="#fdcd04"/><stop offset=".771" stop-color="#fdce05"/><stop offset=".861" stop-color="#ffce0a"/></linearGradient><linearGradient id="we-gw-f"><stop offset=".316" stop-color="#ff4c3c"/><stop offset=".604" stop-color="#ff692c"/><stop offset=".727" stop-color="#ff7825"/><stop offset=".885" stop-color="#ff8d1b"/><stop offset="1" stop-color="#ff9f13"/></linearGradient><linearGradient id="we-gw-b"><stop offset=".231" stop-color="#ff4541"/><stop offset=".312" stop-color="#ff4540"/><stop offset=".458" stop-color="#ff4640"/><stop offset=".54" stop-color="#ff473f"/><stop offset=".699" stop-color="#ff5138"/><stop offset=".771" stop-color="#ff5b33"/><stop offset=".861" stop-color="#ff6c29"/><stop offset="1" stop-color="#ff8c18"/></linearGradient><linearGradient id="we-gw-d"><stop offset=".408" stop-color="#fb4e5a"/><stop offset="1" stop-color="#ff4540"/></linearGradient><linearGradient id="we-gw-c"><stop offset=".132" stop-color="#0cba65"/><stop offset=".21" stop-color="#0bb86d"/><stop offset=".297" stop-color="#09b479"/><stop offset=".396" stop-color="#08ad93"/><stop offset=".477" stop-color="#0aa6a9"/><stop offset=".568" stop-color="#0d9cc6"/><stop offset=".667" stop-color="#1893dd"/><stop offset=".769" stop-color="#258bf1"/><stop offset=".859" stop-color="#3086ff"/></linearGradient><linearGradient id="we-gw-e"><stop offset=".366" stop-color="#ff4e3a"/><stop offset=".458" stop-color="#ff8a1b"/><stop offset=".54" stop-color="#ffa312"/><stop offset=".616" stop-color="#ffb60c"/><stop offset=".771" stop-color="#ffcd0a"/><stop offset=".861" stop-color="#fecf0a"/><stop offset=".915" stop-color="#fecf08"/><stop offset="1" stop-color="#fdcd01"/></linearGradient><linearGradient xlink:href="#we-gw-a" id="we-gw-s" x1="219.7" x2="254.467" y1="329.535" y2="329.535" gradientUnits="userSpaceOnUse"/><radialGradient xlink:href="#we-gw-b" id="we-gw-m" cx="109.627" cy="135.862" r="71.46" fx="109.627" fy="135.862" gradientTransform="matrix(-1.93688 1.043 1.45573 2.55542 290.525 -400.634)" gradientUnits="userSpaceOnUse"/><radialGradient xlink:href="#we-gw-c" id="we-gw-n" cx="45.259" cy="279.274" r="71.46" fx="45.259" fy="279.274" gradientTransform="matrix(-3.5126 -4.45809 -1.69255 1.26062 870.8 191.554)" gradientUnits="userSpaceOnUse"/><radialGradient xlink:href="#we-gw-d" id="we-gw-l" cx="304.017" cy="118.009" r="47.854" fx="304.017" fy="118.009" gradientTransform="matrix(2.06435 0 0 2.59204 -297.679 -151.747)" gradientUnits="userSpaceOnUse"/><radialGradient xlink:href="#we-gw-e" id="we-gw-o" cx="181.001" cy="177.201" r="71.46" fx="181.001" fy="177.201" gradientTransform="matrix(-.24858 2.08314 2.96249 .33417 -255.146 -331.164)" gradientUnits="userSpaceOnUse"/><radialGradient xlink:href="#we-gw-f" id="we-gw-p" cx="207.673" cy="108.097" r="41.102" fx="207.673" fy="108.097" gradientTransform="matrix(-1.2492 1.34326 -3.89684 -3.4257 880.501 194.905)" gradientUnits="userSpaceOnUse"/><radialGradient xlink:href="#we-gw-g" id="we-gw-r" cx="109.627" cy="135.862" r="71.46" fx="109.627" fy="135.862" gradientTransform="matrix(-1.93688 -1.043 1.45573 -2.55542 290.525 838.683)" gradientUnits="userSpaceOnUse"/><radialGradient xlink:href="#we-gw-h" id="we-gw-j" cx="154.87" cy="145.969" r="71.46" fx="154.87" fy="145.969" gradientTransform="matrix(-.0814 -1.93722 2.92674 -.11625 -215.135 632.86)" gradientUnits="userSpaceOnUse"/><filter id="we-gw-q" width="1.097" height="1.116" x="-.048" y="-.058" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="1.701"/></filter><filter id="we-gw-k" width="1.033" height="1.02" x="-.017" y="-.01" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation=".242"/></filter><clipPath id="we-gw-i" clipPathUnits="userSpaceOnUse"><path d="M371.378 193.24H237.083v53.438h77.167c-1.241 7.563-4.026 15.003-8.105 21.786-4.674 7.773-10.451 13.69-16.373 18.196-17.74 13.498-38.42 16.258-52.783 16.258-36.283 0-67.283-23.286-79.285-54.928-.484-1.149-.805-2.335-1.197-3.507a81.115 81.115 0 0 1-4.101-25.448c0-9.226 1.569-18.057 4.43-26.398 11.285-32.897 42.985-57.467 80.179-57.467 7.481 0 14.685.884 21.517 2.648a77.668 77.668 0 0 1 33.425 18.25l40.834-39.712c-24.839-22.616-57.219-36.32-95.844-36.32-30.878 0-59.386 9.553-82.748 25.7-18.945 13.093-34.483 30.625-44.97 50.985-9.753 18.879-15.094 39.8-15.094 62.294 0 22.495 5.35 43.633 15.103 62.337v.126c10.302 19.857 25.368 36.954 43.678 49.988 15.997 11.386 44.68 26.551 84.031 26.551 22.63 0 42.687-4.051 60.375-11.644 12.76-5.478 24.065-12.622 34.301-21.804 13.525-12.132 24.117-27.139 31.347-44.404 7.23-17.265 11.097-36.79 11.097-57.957 0-9.858-.998-19.87-2.689-28.968Z"/></clipPath></defs><g clip-path="url(#we-gw-i)" transform="matrix(.95792 0 0 .98525 -90.174 -78.856)"><path fill="url(#we-gw-j)" d="M92.076 219.958c.148 22.14 6.501 44.983 16.117 63.424v.127c6.949 13.392 16.445 23.97 27.26 34.452l65.327-23.67c-12.36-6.235-14.246-10.055-23.105-17.026-9.054-9.066-15.802-19.473-20.004-31.677h-.17l.17-.127c-2.765-8.058-3.037-16.613-3.14-25.503Z" filter="url(#we-gw-k)"/><path fill="url(#we-gw-l)" d="M237.083 79.025c-6.456 22.526-3.988 44.421 0 57.161 7.457.006 14.64.888 21.45 2.647a77.662 77.662 0 0 1 33.424 18.25l41.88-40.726c-24.81-22.59-54.667-37.297-96.754-37.332Z" filter="url(#we-gw-k)"/><path fill="url(#we-gw-m)" d="M236.943 78.847c-31.67 0-60.91 9.798-84.871 26.359a145.533 145.533 0 0 0-24.332 21.15c-1.904 17.744 14.257 39.551 46.262 39.37 15.528-17.936 38.495-29.542 64.056-29.542l.07.002-1.044-57.335c-.048 0-.093-.004-.14-.004Z" filter="url(#we-gw-k)"/><path fill="url(#we-gw-n)" d="m341.475 226.379-28.268 19.285c-1.24 7.562-4.028 15.002-8.107 21.786-4.674 7.772-10.45 13.69-16.373 18.196-17.702 13.47-38.328 16.244-52.687 16.255-14.842 25.102-17.444 37.675 1.043 57.934 22.877-.016 43.157-4.117 61.046-11.796 12.931-5.551 24.388-12.792 34.761-22.097 13.706-12.295 24.442-27.503 31.769-45 7.327-17.497 11.245-37.282 11.245-58.734Z" filter="url(#we-gw-k)"/><path fill="#3086ff" d="M234.996 191.21v57.498h136.006c1.196-7.874 5.152-18.064 5.152-26.5 0-9.858-.996-21.899-2.687-30.998Z" filter="url(#we-gw-k)"/><path fill="url(#we-gw-o)" d="M128.39 124.327c-8.394 9.119-15.564 19.326-21.249 30.364-9.753 18.879-15.094 41.83-15.094 64.324 0 .317.026.627.029.944 4.32 8.224 59.666 6.649 62.456 0-.004-.31-.039-.613-.039-.924 0-9.226 1.57-16.026 4.43-24.367 3.53-10.289 9.056-19.763 16.123-27.926 1.602-2.031 5.875-6.397 7.121-9.016.475-.997-.862-1.557-.937-1.908-.083-.393-1.876-.077-2.277-.37-1.275-.929-3.8-1.414-5.334-1.845-3.277-.921-8.708-2.953-11.725-5.06-9.536-6.658-24.417-14.612-33.505-24.216Z" filter="url(#we-gw-k)"/><path fill="url(#we-gw-p)" d="M162.099 155.857c22.112 13.301 28.471-6.714 43.173-12.977l-25.574-52.664a144.74 144.74 0 0 0-26.543 14.504c-12.316 8.512-23.192 18.9-32.176 30.72Z" filter="url(#we-gw-q)"/><path fill="url(#we-gw-r)" d="M171.099 290.222c-29.683 10.641-34.33 11.023-37.062 29.29a144.806 144.806 0 0 0 16.792 13.984c15.996 11.386 46.766 26.551 86.118 26.551.046 0 .09-.004.137-.004v-59.157l-.094.002c-14.736 0-26.512-3.843-38.585-10.527-2.977-1.648-8.378 2.777-11.123.799-3.786-2.729-12.9 2.35-16.183-.938Z" filter="url(#we-gw-k)"/><path fill="url(#we-gw-s)" d="M219.7 299.023v59.996c5.506.64 11.236 1.028 17.247 1.028 6.026 0 11.855-.307 17.52-.872v-59.748a105.119 105.119 0 0 1-17.477 1.461c-5.932 0-11.7-.686-17.29-1.865Z" filter="url(#we-gw-k)" opacity=".5"/></g></symbol>
+  </svg>
+<div class="panel slack">
+      <div class="sec-head">
+        <div class="row">
+          <svg class="mark" width="30" height="30" aria-hidden="true"><use href="#we-mark-slack"></use></svg>
+          <h2>Slack</h2>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="product">
+          <svg class="mark" width="40" height="40" aria-hidden="true"><use href="#we-mark-slack"></use></svg>
+          <span class="name">Slack</span>
+          <span class="kind">One product</span>
+        </div>
+        <div class="wires" aria-hidden="true">
+          <svg viewBox="0 0 100 300" preserveAspectRatio="none">
+            <path d="M0,150 C45,150 55,50 100,50"></path>
+            <path d="M0,150 L100,150"></path>
+            <path d="M0,150 C45,150 55,250 100,250"></path>
+          </svg>
+        </div>
+        <div class="tenants">
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Acme Robotics</span><span class="tenant-addr">acme.slack.com</span></div>
+            <div class="channels">
+              <div class="channel"><span class="sigil" style="color:#2eb67d">#</span>general <span class="tag">public</span></div>
+              <div class="channel"><span class="sigil" style="color:#e01e5a">🔒</span>founders <span class="tag">private</span></div>
+              <div class="channel"><span class="sigil" style="color:#36c5f0">✉</span>Priya → Marcus <span class="tag">DM</span></div>
+            </div>
+            <div class="sub">Members</div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#e01e5a">PR</span>Priya</span>
+              <span class="user"><span class="avatar" style="background:#2eb67d">MA</span>Marcus</span>
+              <span class="user"><span class="avatar" style="background:#36c5f0">LI</span>Lin</span>
+            </div>
+          </div>
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Bluefin Bank</span><span class="tenant-addr">bluefin.slack.com</span></div>
+            <div class="channels">
+              <div class="channel"><span class="sigil" style="color:#2eb67d">#</span>trading-desk <span class="tag">public</span></div>
+              <div class="channel"><span class="sigil" style="color:#e01e5a">🔒</span>risk-review <span class="tag">private</span></div>
+              <div class="channel"><span class="sigil" style="color:#36c5f0">✉</span>Ana → Tomas <span class="tag">DM</span></div>
+            </div>
+            <div class="sub">Members</div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#ecb22e">AN</span>Ana</span>
+              <span class="user"><span class="avatar" style="background:#611f69">TO</span>Tomas</span>
+              <span class="user"><span class="avatar" style="background:#2eb67d">RU</span>Ruth</span>
+            </div>
+          </div>
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Cedar Schools</span><span class="tenant-addr">cedar.slack.com</span></div>
+            <div class="channels">
+              <div class="channel"><span class="sigil" style="color:#2eb67d">#</span>staff-room <span class="tag">public</span></div>
+              <div class="channel"><span class="sigil" style="color:#e01e5a">🔒</span>admissions <span class="tag">private</span></div>
+              <div class="channel"><span class="sigil" style="color:#36c5f0">✉</span>Sam → Noor <span class="tag">DM</span></div>
+            </div>
+            <div class="sub">Members</div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#36c5f0">SA</span>Sam</span>
+              <span class="user"><span class="avatar" style="background:#e01e5a">NO</span>Noor</span>
+              <span class="user"><span class="avatar" style="background:#ecb22e">DA</span>Dara</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<div class="panel gws">
+      <div class="sec-head">
+        <div class="row">
+          <svg class="mark" width="30" height="30" aria-hidden="true"><use href="#we-mark-gws"></use></svg>
+          <h2>Google Workspace</h2>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="product">
+          <svg class="mark" width="40" height="40" aria-hidden="true"><use href="#we-mark-gws"></use></svg>
+          <span class="name">Workspace</span>
+          <span class="kind">One product</span>
+        </div>
+        <div class="wires" aria-hidden="true">
+          <svg viewBox="0 0 100 300" preserveAspectRatio="none">
+            <path d="M0,150 C45,150 55,50 100,50"></path>
+            <path d="M0,150 L100,150"></path>
+            <path d="M0,150 C45,150 55,250 100,250"></path>
+          </svg>
+        </div>
+        <div class="tenants">
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Acme Robotics</span><span class="tenant-addr">@acmerobotics.com</span></div>
+            <div class="sub">Shared inside the domain</div>
+            <div class="apps">
+              <span class="app"><span class="dot" style="background:#ea4335"></span>Gmail</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Calendar</span>
+              <span class="app"><span class="dot" style="background:#fbbc04"></span>Drive</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Docs</span>
+              <span class="app"><span class="dot" style="background:#34a853"></span>Sheets</span>
+              <span class="app"><span class="dot" style="background:#fbbc04"></span>Slides</span>
+            </div>
+            <div class="divider"></div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#ea4335">PR</span>priya@acmerobotics.com</span>
+              <span class="user"><span class="avatar" style="background:#34a853">MA</span>marcus@acmerobotics.com</span>
+            </div>
+          </div>
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Bluefin Bank</span><span class="tenant-addr">@bluefinbank.com</span></div>
+            <div class="sub">Shared inside the domain</div>
+            <div class="apps">
+              <span class="app"><span class="dot" style="background:#ea4335"></span>Gmail</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Calendar</span>
+              <span class="app"><span class="dot" style="background:#fbbc04"></span>Drive</span>
+              <span class="app"><span class="dot" style="background:#34a853"></span>Sheets</span>
+            </div>
+            <div class="divider"></div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#4285f4">AN</span>ana@bluefinbank.com</span>
+              <span class="user"><span class="avatar" style="background:#fbbc04">TO</span>tomas@bluefinbank.com</span>
+            </div>
+          </div>
+          <div class="tenant">
+            <div class="tenant-head"><span class="tenant-name">Cedar Schools</span><span class="tenant-addr">@cedarschools.org</span></div>
+            <div class="sub">Shared inside the domain</div>
+            <div class="apps">
+              <span class="app"><span class="dot" style="background:#ea4335"></span>Gmail</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Calendar</span>
+              <span class="app"><span class="dot" style="background:#fbbc04"></span>Drive</span>
+              <span class="app"><span class="dot" style="background:#4285f4"></span>Docs</span>
+            </div>
+            <div class="divider"></div>
+            <div class="users">
+              <span class="user"><span class="avatar" style="background:#34a853">SA</span>sam@cedarschools.org</span>
+              <span class="user"><span class="avatar" style="background:#ea4335">NO</span>noor@cedarschools.org</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</figure>
