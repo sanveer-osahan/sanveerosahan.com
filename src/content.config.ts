@@ -10,6 +10,16 @@ const articles = defineCollection({
 		draft: z.boolean().default(false),
 		tags: z.array(z.string()).default([]),
 		videoUrl: z.string().url().optional(),
+		sources: z
+			.array(
+				z.object({
+					title: z.string(),
+					author: z.string().optional(),
+					// An external URL, or a path on this site such as a Reading.
+					url: z.string().refine((v) => v.startsWith("/") || URL.canParse(v)),
+				}),
+			)
+			.default([]),
 	}),
 });
 
@@ -48,6 +58,7 @@ const bookshelf = defineCollection({
 			pages: z.number(),
 			cover: image(),
 			readDate: z.coerce.date(),
+			oreilly: z.string().url().optional(),
 			amazonCom: z.string().url().optional(),
 			amazonIn: z.string().url().optional(),
 			draft: z.boolean().default(false),

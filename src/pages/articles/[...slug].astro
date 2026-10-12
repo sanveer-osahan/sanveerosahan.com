@@ -60,6 +60,27 @@ const readingMinutes = getReadingTime(article.body ?? "");
 		<div class="prose">
 			<Content />
 		</div>
+		{
+			article.data.sources.length > 0 && (
+				<section class="sources">
+					<h2>Sources</h2>
+					<ul>
+						{article.data.sources.map((source) => (
+							<li>
+								{source.url.startsWith("/") ? (
+									<a href={withBase(source.url)}>{source.title}</a>
+								) : (
+									<a href={source.url} rel="noopener" target="_blank">
+										{source.title}
+									</a>
+								)}
+								{source.author && <span class="source-author"> by {source.author}</span>}
+							</li>
+						))}
+					</ul>
+				</section>
+			)
+		}
 	</article>
 	{/* The column is drawn even when the Contents is empty, so the prose sits in
 	    the same place on every Article. */}
@@ -133,6 +154,42 @@ const readingMinutes = getReadingTime(article.body ?? "");
 	}
 	.prose :global(p) {
 		margin: 0 0 1.1em;
+	}
+	.sources {
+		margin-top: 48px;
+		padding-top: 24px;
+		border-top: 1px solid var(--hairline);
+	}
+	.sources h2 {
+		font-family: var(--font-serif);
+		font-weight: 500;
+		font-size: clamp(18px, 2.4vw, 21px);
+		letter-spacing: -0.012em;
+		color: hsl(var(--theme-text));
+		margin: 0 0 0.6em;
+	}
+	.sources ul {
+		list-style: disc;
+		margin: 0;
+		padding-left: 1.4em;
+	}
+	.sources li {
+		margin: 0 0 0.5em;
+	}
+	.sources li::marker {
+		color: hsl(var(--theme-text) / 0.45);
+	}
+	.sources a {
+		color: hsl(var(--theme-link));
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		text-decoration-thickness: 1px;
+	}
+	.sources a:hover {
+		text-decoration: none;
+	}
+	.source-author {
+		color: hsl(var(--theme-text-muted));
 	}
 	.prose :global(h2) {
 		scroll-margin-top: 24px;

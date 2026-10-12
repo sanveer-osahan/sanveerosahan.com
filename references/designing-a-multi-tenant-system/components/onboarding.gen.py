@@ -97,7 +97,6 @@ COMPONENT = f'''<!--
 .diagram-onboarding svg{{display:block;width:100%;height:auto;color:inherit}}
 </style>
 <svg viewBox="0 0 {W} {H}" role="img" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-label="{ALT}">
-  {frame(W, H)}
   {flow_one()}
   {flow_two()}
 </svg>
