@@ -559,12 +559,10 @@ We will consider a tenant to be a Workspace in our design.
 
 ### Core Requirements
 
-- Users can sign-up/sign-in using personal email or professional email.
-- When a user signs up using their personal email, they have the option to create their own workspace or join another workspace using an invite code.
-- When a user signs up using their professional email, they have the option to create their own workspace or choose from a list of workspaces that other members of their team have created.
+- Users can sign-up/sign-in using their email.
+- When a user signs up, they have the option to create their own workspace or join another workspace.
 - When a user is signed-in, they can switch their workspace from a list of workspaces they are a part of or create a new workspace at any point of time.
 - A user has to belong to at least one workspace.
-- Two workspaces cannot have the same name.
 
 ### Out of Scope
 
@@ -578,12 +576,7 @@ In the design, we will consider cases where some workspaces will have high usage
 
 ### Core Requirements
 
-- A user should be able to only see the workspaces they are part of.
-- This applies to the data as well where resources of one workspace should not be accessed by members of another workspace - be it viewing or editing it.
-- Even if a user belongs to multiple workspaces, they will have their own data and resources isolated in those.
-- Any upgrade to the system overall should be available on all the Workspaces.
-- Invite codes need to be cryptographically random (not sequential/guessable).
-- Every workspace creation, join, and switch event should be logged with actor, timestamp, and action, needed later for compliance and for debugging.
+- A user can only view or edit the workspaces they are part of, and the resources of each workspace stay isolated from the others.
 - Heavy usage on a few workspaces should not impact performance on other workspaces.
 
 ### Out of Scope
