@@ -38,6 +38,9 @@ sources:
   - title: "POSIX: fork()"
     author: "The Open Group"
     url: "https://pubs.opengroup.org/onlinepubs/9799919799/functions/fork.html"
+  - title: "What Is Database Connection Pooling? Definition and Examples"
+    author: "Sami Ahmed Siddiqui"
+    url: "https://www.yugabyte.com/key-concepts/what-is-database-connection-pooling-definition-and-examples/"
 ---
 
 ## Connecting to a Database
@@ -87,4 +90,38 @@ The client then sends ACK and the TCP handshake is complete thus establishing th
 <figure class="diagram">
 <img class="theme-light-only" src="/images/posts/testing-postgres-max-connections/tcp-handshake.light.png" alt="The Database Client connects to port 5432 on the Database Server. The TCP handshake runs between client port 5123 and server port 5432." />
 <img class="theme-dark-only" src="/images/posts/testing-postgres-max-connections/tcp-handshake.dark.png" alt="The Database Client connects to port 5432 on the Database Server. The TCP handshake runs between client port 5123 and server port 5432." />
+</figure>
+
+### Phase 3 : Postmaster accepts the connection
+
+Postmaster accepts the connection after the TCP handshake and forks a new child process.
+These child processes are backend processes which gets the connection and they can communicate with each other using semaphores and shared memory to maintain the data integrity throughout the concurrent data access.
+
+Once a connection is established, the client can now send a query in plain text form to the Database backend process and the backend process parses the query, creates a plan, and returns the results over the connection.
+
+<figure class="diagram">
+<img class="theme-light-only" src="/images/posts/testing-postgres-max-connections/postmaster-accept.light.png" alt="The postmaster accepts the connection on port 5432 and forks a child process. The Database Client on port 5123 and the child process then exchange the query and the query results." />
+<img class="theme-dark-only" src="/images/posts/testing-postgres-max-connections/postmaster-accept.dark.png" alt="The postmaster accepts the connection on port 5432 and forks a child process. The Database Client on port 5123 and the child process then exchange the query and the query results." />
+</figure>
+
+## What is Connection Pooling?
+
+Postgres uses a multi-process architecture where one process is allowed per connection.
+So when the Application Server which is handling multiple requests at a given time uses multiple connections to the Postgres Database Server.
+
+For handling multiple requests that expect to run queries on the database, establishing a new connection for each process every time using the TCP handshake is considered as a heavy tax before a single byte of actual data is allowed.
+
+Connection Pooling is used to solve this exact bottleneck.
+A Connection Pooler maintains a fixed set of pre-established Database connections which are reused across the Application Server requests.
+
+The Connection Pool acts as a cache of already established connections which the Application process borrows, executes the query, and then releases the connection back to the cache when done. The connection then is ready to be picked by other processes.
+
+
+
+If there are no connections available in the pool, then the request is queued and have to wait for one to be released.
+A timeout is configured on how much the request is allowed to wait in the queue. If the wait time is exceeded, the query is marked as failed.
+
+<figure class="diagram">
+<img class="theme-light-only" src="/images/posts/testing-postgres-max-connections/connection-pool.light.png" alt="The Application Server holds a Connection Pool with 3 open connections to the Database. Requests 1 to 3 borrow a connection and release it. Request 4 waits in a queue until a connection is free." />
+<img class="theme-dark-only" src="/images/posts/testing-postgres-max-connections/connection-pool.dark.png" alt="The Application Server holds a Connection Pool with 3 open connections to the Database. Requests 1 to 3 borrow a connection and release it. Request 4 waits in a queue until a connection is free." />
 </figure>
