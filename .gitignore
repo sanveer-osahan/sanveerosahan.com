@@ -28,3 +28,8 @@ temp/
 # local tooling
 .playwright-mcp/
 .superpowers/
+
+# private notes (the repo is public)
+job-applications/
+solopreneur-research/
+youtube/
