@@ -399,7 +399,10 @@ const readingMinutes = getReadingTime(article.body ?? "");
 	.prose :global(#zcc-lin:checked ~ .tabnav label[for="zcc-lin"]),
 	.prose :global(#zcx-mac:checked ~ .tabnav label[for="zcx-mac"]),
 	.prose :global(#zcx-win:checked ~ .tabnav label[for="zcx-win"]),
-	.prose :global(#zcx-lin:checked ~ .tabnav label[for="zcx-lin"]) {
+	.prose :global(#zcx-lin:checked ~ .tabnav label[for="zcx-lin"]),
+	.prose :global(#go-mac:checked ~ .tabnav label[for="go-mac"]),
+	.prose :global(#go-win:checked ~ .tabnav label[for="go-win"]),
+	.prose :global(#go-lin:checked ~ .tabnav label[for="go-lin"]) {
 		color: hsl(var(--theme-accent));
 		background: var(--paper);
 		border-color: var(--hairline);
@@ -435,7 +438,10 @@ const readingMinutes = getReadingTime(article.body ?? "");
 	.prose :global(#zcc-lin:checked ~ .tabpanes > .pane-zcc-lin),
 	.prose :global(#zcx-mac:checked ~ .tabpanes > .pane-zcx-mac),
 	.prose :global(#zcx-win:checked ~ .tabpanes > .pane-zcx-win),
-	.prose :global(#zcx-lin:checked ~ .tabpanes > .pane-zcx-lin) {
+	.prose :global(#zcx-lin:checked ~ .tabpanes > .pane-zcx-lin),
+	.prose :global(#go-mac:checked ~ .tabpanes > .pane-go-mac),
+	.prose :global(#go-win:checked ~ .tabpanes > .pane-go-win),
+	.prose :global(#go-lin:checked ~ .tabpanes > .pane-go-lin) {
 		display: block;
 	}
 	.prose :global(a) {
