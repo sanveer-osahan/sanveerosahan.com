@@ -2,7 +2,7 @@
 title: "Understanding Database Connection Limits"
 description: ""
 publishDate: 2026-10-19
-draft: true
+draft: false
 tags: ["postgres", "multi-tenancy", "b2b"]
 sources:
   - title: "PostgreSQL Documentation: How Connections Are Established"

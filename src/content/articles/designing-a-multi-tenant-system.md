@@ -10,6 +10,8 @@ sources:
     url: "/bookshelf/building-multi-tenant-saas-architectures/"
 ---
 
+Watch the video: [Designing a Multi-Tenant System](https://www.youtube.com/watch?v=Du6yxdDf8CA)
+
 ## When is Multi-Tenancy needed?
 
 There are many other articles on the internet that talk about multi-tenancy as a SaaS application that serves multiple users, known as tenants. Each tenant's data is isolated and invisible to others, ensuring privacy and security.
