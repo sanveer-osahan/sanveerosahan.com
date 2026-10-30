@@ -1,6 +1,6 @@
 ---
 title: "Database Connection Mistakes That Cause System Outages"
-description: "In this article, we understand what happens when a misconfiguration of database connection limits can cause system outage. We see how a connection works, why a connection pool is required, and how to configure max_connections and pool size. We do a deep dive and understand the concepts by executing them using code examples."
+description: "What happens when a misconfiguration of database connection limits can cause system outage? See how a connection works, why a connection pool is required, and how to configure connection limits."
 publishDate: 2026-10-19
 draft: false
 tags: ["postgres", "multi-tenancy", "b2b"]
