@@ -1,6 +1,6 @@
 ---
-title: "Understanding Database Connection Limits"
-description: ""
+title: "Database Connection Mistakes That Cause System Outages"
+description: "How connections, pools, queues and timeouts work, and how they caused real outages at Resend and Buttondown."
 publishDate: 2026-10-19
 draft: false
 tags: ["postgres", "multi-tenancy", "b2b"]
