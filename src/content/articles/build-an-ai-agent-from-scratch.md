@@ -1,5 +1,5 @@
 ---
-title: "Build an AI Agent from scratch"
+title: "Build an AI Agent from Scratch"
 description: ""
 publishDate: 2026-11-12
 draft: true
