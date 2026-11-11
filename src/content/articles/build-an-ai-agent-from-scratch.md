@@ -1,5 +1,5 @@
 ---
-title: "Build an AI Agent from Scratch | Design and Concepts | Part 1"
+title: "Build an AI Agent from Scratch | Tools, MCP, and LangGraph | Part 1"
 description: ""
 publishDate: 2026-11-12
 draft: false
