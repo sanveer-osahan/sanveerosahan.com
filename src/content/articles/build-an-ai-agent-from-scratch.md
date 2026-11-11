@@ -1,9 +1,19 @@
 ---
-title: "Build an AI Agent from Scratch"
+title: "Build an AI Agent from Scratch: Part 1"
 description: ""
-publishDate: 2026-11-08
-draft: true
+publishDate: 2026-11-12
+draft: false
 tags: []
+sources:
+  - title: "Building effective agents"
+    author: "Anthropic"
+    url: "https://www.anthropic.com/research/building-effective-agents"
+  - title: "LangChain Documentation"
+    author: "LangChain"
+    url: "https://docs.langchain.com/oss/python/langchain/overview"
+  - title: "LangGraph Documentation"
+    author: "LangChain"
+    url: "https://docs.langchain.com/oss/python/langgraph/overview"
 ---
 
 ## Why we need AI Agents?
@@ -174,7 +184,7 @@ Create the project with [uv](https://docs.astral.sh/uv/) and add the dependencie
 ```bash
 uv init support-agent
 cd support-agent
-uv add langchain-openai python-dotenv
+uv add langchain langchain-openai python-dotenv
 ```
 
 Add the values to a `.env` file:
@@ -250,6 +260,7 @@ Define the Tool, give it to the LLM, and run the Tool when the LLM asks for it:
 
 ```python
 import os
+import json
 
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
@@ -290,15 +301,19 @@ messages = [
 ]
 
 response = llm_with_tools.invoke(messages)
+print("\nLLM Response : ")
+response.pretty_print()
 
 while response.tool_calls:
     messages.append(response)
     for tool_call in response.tool_calls:
-        print(tool_call)
-        messages.append(run_postgres_query.invoke(tool_call))
+        print("\nTool Call : \n", json.dumps(tool_call, indent=2))
+        tool_response = run_postgres_query.invoke(tool_call)
+        print("\nTool Response : \n", tool_response)
+        messages.append(tool_response)
     response = llm_with_tools.invoke(messages)
-
-print(response.content)
+    print("\nLLM Response : ")
+    response.pretty_print()
 ```
 
 Output:
@@ -329,9 +344,16 @@ We use the [DuckDuckGo MCP server](https://github.com/nickclyde/duckduckgo-mcp-s
 - `fetch_content`: fetches a web page and returns its text.
 - `expand_link`: returns the full URL for a link from the search results.
 
+Start the MCP server in a separate terminal:
+
+```bash
+uvx duckduckgo-mcp-server --transport streamable-http --port 8000
+```
+
 ```python
 import asyncio
 import os
+import json
 
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
@@ -373,10 +395,9 @@ async def main():
     mcp_client = MultiServerMCPClient(
         {
             "duckduckgo": {
-              "command": "sh",
-              "args": ["-c", "uvx duckduckgo-mcp-server 2>>mcp-duckduckgo.log"],
-              "transport": "stdio",
-          }
+                "url": "http://127.0.0.1:8000/mcp",
+                "transport": "streamable_http",
+            }
         }
     )
 
@@ -395,7 +416,7 @@ async def main():
     
     messages = [
         SystemMessage(SYSTEM_PROMPT),
-        HumanMessage("In Snowflake, what are the various Data Types supported? Which data type was added recently and when it was added? Provide verified references for the claim.")
+        HumanMessage("In Snowflake, what are the various Data Types supported? Which data type was added recently and when it was added? Provide verified references for the claim with the source links.")
     ]
     
     response = await llm_with_tools.ainvoke(messages)
@@ -404,21 +425,561 @@ async def main():
         messages.append(response)
         for tool_call in response.tool_calls:
             tool_call_name = tool_call["name"]
-            print(tool_call_name)
+            print("\nTool Call:\n")
+            print(json.dumps(tool_call, indent=2))
             tool = tools_by_name[tool_call_name]
-            messages.append(await tool.ainvoke(tool_call))
+            tool_response = await tool.ainvoke(tool_call)
+            print("\nTool Response:\n")
+            tool_response.pretty_print()
+            messages.append(tool_response)
         response = llm_with_tools.invoke(messages)
+        print("\nLLM Response:\n")
+        response.pretty_print()
+        
+asyncio.run(main())
+```
+
+- `MultiServerMCPClient`: connects to the MCP server that runs at `http://127.0.0.1:8000/mcp`, over the `streamable_http` transport.
+- `get_tools()`: asks the MCP server for its Tools and turns them into LangChain Tools. We do not write any Tool code.
+- `tools_by_name`: the LLM can pick any of the 3 Tools, so we find the Tool by the name in the Tool call.
+- `await` and `ainvoke`: the MCP Tools are async, so the code runs inside `asyncio.run(main())`.
+
+### Create Agent
+
+Instead of creating the loop yourself, you can create an agent in langchain which creates and manages the loop for you.
+
+```python
+import asyncio
+import os
+import json
+
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain.agents import create_agent
+from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_core.tools import tool
+from langgraph.errors import GraphRecursionError
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
+
+load_dotenv()
+
+pg_engine = create_engine(os.environ["POSTGRES_DATABASE_URL"])
+
+SYSTEM_PROMPT = """
+You have the ability to call run_postgres_query tool which takes the sql text as input and returns the results. 
+When answering questions related to Postgres, do use this tool to verify the results.
+For any other database, if you don't have the tool to run a query against it, use web search tools - search, fetch_content, expand_link, to gather context.
+"""
+
+
+@tool
+def run_postgres_query(sql: str):
+    """Run a SQL query on a real Postgres Database and return the results"""
+    with pg_engine.connect() as conn:
+        try:
+            rows = conn.execute(text(sql)).fetchall()
+        except SQLAlchemyError as e:
+            return f"Error: {e}"
+        finally:
+            conn.rollback()
+    return str(rows)
+
+
+tools_by_name = {"run_postgres_query": run_postgres_query}
+tools = [run_postgres_query]
+
+
+async def main():
+    mcp_client = MultiServerMCPClient(
+        {
+            "duckduckgo": {
+                "url": "http://127.0.0.1:8000/mcp",
+                "transport": "streamable_http",
+            }
+        }
+    )
+
+    mcp_tools = await mcp_client.get_tools()
+    for tool in mcp_tools:
+        tools_by_name[tool.name] = tool
+        tools.append(tool)
+
+    llm = ChatOpenAI(
+        base_url=os.environ["LLM_BASE_URL"],
+        api_key=os.environ["LLM_API_KEY"],
+        model="gemma4:26b",
+    )
+
+    agent = create_agent(
+        model=llm,
+        tools=tools,
+        system_prompt=SYSTEM_PROMPT
+    )
+
+    messages = [
+        HumanMessage("In Snowflake, what are the various Data Types supported? Which data type was added recently and when it was added? Provide verified references for the claim with the source links.")
+    ]
     
-    print(response.content)
+    response = await agent.ainvoke(input={"messages": messages}, config={"recursion_limit": 10})
+    for message in response["messages"]:
+        message.pretty_print()
+        
+asyncio.run(main())
+```
+
+- `recursion_limit`: each Tool call uses 2 steps, one LLM step and one Tool step. The final answer uses 1 more step. With a limit of 10, the agent can make about 4 Tool calls before it raises `GraphRecursionError`.
+
+### Structured Output
+
+`create_agent` uses LangGraph to build the loop. One agent can solve one subtask, and we can connect these subtasks together to solve a complex task.
+
+For that, each subtask can return a Structured Output: an object with fixed fields instead of text. The other downstream subtasks can read its values and can define their own behaviour.
+
+Example: compare how regex matching works in Postgres, MySQL and Snowflake, and return the result as a Pydantic object.
+
+Start a MySQL instance with Docker:
+
+```bash
+docker run -d --name mysql \
+  -e MYSQL_ROOT_PASSWORD=password \
+  -e MYSQL_DATABASE=demo \
+  -p 3306:3306 \
+  mysql:8.4
+```
+
+Add the MySQL driver to the project:
+
+```bash
+uv add pymysql cryptography
+```
+
+Add the connection URL to the `.env` file:
+
+```bash
+MYSQL_DATABASE_URL=mysql+pymysql://root:password@localhost:3306/demo
+```
+
+```python
+import asyncio
+import os
+from typing import Literal
+
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain.agents import create_agent
+from langchain.agents.structured_output import ToolStrategy
+from langchain_core.messages import HumanMessage
+from langchain_core.tools import tool
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from pydantic import BaseModel, Field
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
+
+load_dotenv()
+
+pg_engine = create_engine(os.environ["POSTGRES_DATABASE_URL"])
+mysql_engine = create_engine(os.environ["MYSQL_DATABASE_URL"])
+
+SYSTEM_PROMPT = """
+You compare SQL behaviour across databases.
+Use run_postgres_query to run SQL on Postgres and run_mysql_query to run SQL on MySQL.
+For Snowflake, there is no database to run a query against. Use the web search tools - search, fetch_content, expand_link - to find the answer in the Snowflake docs.
+Do not answer from memory. Every result must come from a query or a source link.
+When you have all the results, call the RegexComparison tool to return the final answer. Do not answer in plain text.
+"""
+
+
+def run_query(engine, sql):
+    with engine.connect() as conn:
+        try:
+            rows = conn.execute(text(sql)).fetchall()
+        except SQLAlchemyError as e:
+            return f"Error: {e}"
+        finally:
+            conn.rollback()
+    return str(rows)
+
+
+@tool
+def run_postgres_query(sql: str):
+    """Run a SQL query on a real Postgres Database and return the results"""
+    return run_query(pg_engine, sql)
+
+
+@tool
+def run_mysql_query(sql: str):
+    """Run a SQL query on a real MySQL Database and return the results"""
+    return run_query(mysql_engine, sql)
+
+
+class PatternMatch(BaseModel):
+    pattern: str
+    matched: bool
+
+
+class DatabaseResult(BaseModel):
+    database: Literal["postgres", "mysql", "snowflake"]
+    sql: str = Field(description="The SQL that tests the patterns")
+    checked_by: Literal["query", "web_search"]
+    query_result: str | None = Field(description="The rows exactly as the query tool returned them. None if checked_by is web_search")
+    source_url: str | None = Field(description="The URL of the docs page. None if checked_by is query")
+    matches: list[PatternMatch] = Field(description="One item for each pattern")
+
+
+class RegexComparison(BaseModel):
+    results: list[DatabaseResult] = Field(description="One item for each database")
+    differences: list[str] = Field(description="Each difference between the databases, one per item")
+
+
+async def main():
+    mcp_client = MultiServerMCPClient(
+        {
+            "duckduckgo": {
+                "url": "http://127.0.0.1:8000/mcp",
+                "transport": "streamable_http",
+            }
+        }
+    )
+    mcp_tools = await mcp_client.get_tools()
+
+    llm = ChatOpenAI(
+        base_url=os.environ["LLM_BASE_URL"],
+        api_key=os.environ["LLM_API_KEY"],
+        model="gemma4:26b",
+    )
+
+    agent = create_agent(
+        model=llm,
+        tools=[run_postgres_query, run_mysql_query, *mcp_tools],
+        system_prompt=SYSTEM_PROMPT,
+        response_format=ToolStrategy(RegexComparison),
+    )
+
+    messages = [
+        HumanMessage("How does regex matching work in Postgres, MySQL and Snowflake? For each database, check if 'Hello World' matches the patterns 'World' and 'world'. Show the SQL and the result.")
+    ]
+
+    response = await agent.ainvoke(input={"messages": messages}, config={"recursion_limit": 25})
+    for message in response["messages"]:
+        message.pretty_print()
+
+    comparison = response["structured_response"]
+    if comparison is None:
+        comparison = await llm.with_structured_output(RegexComparison).ainvoke(response["messages"])
+    print(comparison.model_dump_json(indent=2))
+
 
 asyncio.run(main())
 ```
 
-- `MultiServerMCPClient`: starts the MCP server with `uvx duckduckgo-mcp-server` and talks to it over `stdio`.
-- `get_tools()`: asks the MCP server for its Tools and turns them into LangChain Tools. We do not write any Tool code.
-- `tools_by_name`: the LLM can pick any of the 3 Tools, so we find the Tool by the name in the Tool call.
-- `await` and `ainvoke`: the MCP Tools are async, so the code runs inside `asyncio.run(main())`.
-  
+Example structured response:
+
+```json
+{
+  "results": [
+    {
+      "database": "postgres",
+      "sql": "SELECT 'Hello World' ~ 'World' AS matches_World, 'Hello World' ~ 'world' AS matches_world;",
+      "checked_by": "query",
+      "query_result": "[(True, False)]",
+      "source_url": "N/A",
+      "matches": [
+        {
+          "pattern": "'Hello World' ~ 'World' -> True",
+          "matched": true
+        },
+        {
+          "pattern": "'Hello World' ~ 'world' -> False",
+          "matched": false
+        }
+      ]
+    },
+    {
+      "database": "mysql",
+      "sql": "SELECT 'Hello World' REGEXP 'World' AS matches_World, 'Hello World' REGEXP 'world' AS matches_world;",
+      "checked_by": "query",
+      "query_result": "[(1, 1)]",
+      "source_url": "N/A",
+      "matches": [
+        {
+          "pattern": "'Hello World' REGEXP 'World' -> 1",
+          "matched": true
+        },
+        {
+          "pattern": "'Hello World' REGEXP 'world' -> 1",
+          "matched": true
+        }
+      ]
+    },
+    {
+      "database": "snowflake",
+      "sql": "SELECT REGEXP_LIKE('Hello World', 'World') AS matches_World, REGEXP_LIKE('Hello World', 'world') AS matches_world;",
+      "checked_by": "web_search",
+      "query_result": "N/A",
+      "source_url": "https://docs.snowflake.com/en/sql-reference/functions-regexp",
+      "matches": [
+        {
+          "pattern": "REGEXP_LIKE('Hello World', 'World') -> True",
+          "matched": true
+        },
+        {
+          "pattern": "REGEXP_LIKE('Hello World', 'world') -> False",
+          "matched": false
+        }
+      ]
+    }
+  ],
+  "differences": [
+    "Postgres uses the `~` operator and is case-sensitive by default.",
+    "MySQL uses the `REGEXP` operator and is case-insensitive by default (dependent on the collation, e.g., `utf8mb4_general_ci`).",
+    "Snowflake uses `REGEXP_LIKE` and is case-sensitive by default (unless the 'i' parameter is explicitly used)."
+  ]
+}
+```
+
+- `RegexComparison`: the Pydantic model the agent must return. The `Field` descriptions go to the LLM with the schema.
+- `response_format=ToolStrategy(RegexComparison)`: LangChain gives the LLM the schema as one more Tool. The agent stops when the LLM calls that Tool, and LangChain checks the arguments against the model.
+- `recursion_limit` is 25: the agent runs queries on 2 databases, searches the web, and calls the schema Tool.
+
+### Creating a Workflow
+
+In the previous section, one agent solved one subtask and returned a Structured Output. With LangGraph, we can orchestrate multiple agents in one workflow, where the output of one agent decides which agent runs next.
+
+Let's take an example where a user asks a question about the data in the database. The first step classifies the question:
+
+- `non_sql`: the question is not related to SQL, so we reject it.
+- `data`: the user asks for specific data. An agent translates it into a SQL query, runs it and returns the results.
+- `generic`: the user asks how to do something in SQL. One agent searches the web and another agent runs an example query, both at the same time. A final step combines both the results.
+
+<figure class="diagram">
+<img class="theme-light-only" src="/images/posts/build-an-ai-agent-from-scratch/workflow.light.png" alt="Workflow graph: START goes to classify. classify routes non_sql to reject, data to data_agent, and generic to query_agent and web_agent in parallel. query_agent and web_agent go to combine. reject, data_agent and combine go to END." />
+<img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/workflow.dark.png" alt="Workflow graph: START goes to classify. classify routes non_sql to reject, data to data_agent, and generic to query_agent and web_agent in parallel. query_agent and web_agent go to combine. reject, data_agent and combine go to END." />
+</figure>
+
+Create the `orders` table in Postgres and add some rows:
+
+```bash
+docker exec -i postgres psql -U postgres <<'SQL'
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY,
+  customer TEXT,
+  amount NUMERIC,
+  created_at DATE
+);
+
+INSERT INTO orders (customer, amount, created_at) VALUES
+  ('Asha', 120, '2026-10-01'),
+  ('Ravi', 80, '2026-10-02'),
+  ('Asha', 200, '2026-10-05'),
+  ('Meera', 50, '2026-10-07'),
+  ('Ravi', 150, '2026-10-09');
+SQL
+```
+
+Start the MCP server in a separate terminal:
+
+```bash
+uvx duckduckgo-mcp-server --transport streamable-http --port 8000
+```
+
+```python
+import asyncio
+import os
+from typing import Literal, TypedDict
+
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain.agents.structured_output import ToolStrategy
+from langchain_core.tools import tool
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_openai import ChatOpenAI
+from langgraph.graph import END, START, StateGraph
+from pydantic import BaseModel
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
+
+load_dotenv()
+
+pg_engine = create_engine(os.environ["POSTGRES_DATABASE_URL"])
+
+mcp_client = MultiServerMCPClient(
+    {
+        "duckduckgo": {
+            "url": "http://127.0.0.1:8000/mcp",
+            "transport": "streamable_http",
+        }
+    }
+)
+
+llm = ChatOpenAI(
+    base_url=os.environ["LLM_BASE_URL"],
+    api_key=os.environ["LLM_API_KEY"],
+    model="gemma4:26b",
+)
+
+CLASSIFY_PROMPT = """
+Find the type of the question:
+- non_sql: the question is not about SQL or about data in the database.
+- data: the question asks for data that is in the database.
+- generic: the question asks how to do something in SQL.
+To find if the database has the data, use run_postgres_query to query information_schema or the pg system tables.
+"""
+
+SQL_PROMPT = """
+You answer questions with SQL on a Postgres database.
+Use run_postgres_query to run the SQL. Do not answer from memory.
+Return the SQL and the result.
+"""
+
+WEB_PROMPT = """
+You find how to do something in Postgres SQL.
+Use the web search tools to find the answer in the Postgres docs. Do not answer from memory.
+Return the answer and the source URL.
+"""
 
 
+@tool
+def run_postgres_query(sql: str):
+    """Run a SQL query on a real Postgres Database and return the results"""
+    with pg_engine.connect() as conn:
+        try:
+            rows = conn.execute(text(sql)).fetchall()
+        except SQLAlchemyError as e:
+            return f"Error: {e}"
+        finally:
+            conn.rollback()
+    return str(rows)
 
+
+class Question(BaseModel):
+    kind: Literal["non_sql", "data", "generic"]
+
+
+classify_agent = create_agent(
+    model=llm,
+    tools=[run_postgres_query],
+    system_prompt=CLASSIFY_PROMPT,
+    response_format=ToolStrategy(Question),
+)
+
+sql_agent = create_agent(model=llm, tools=[run_postgres_query], system_prompt=SQL_PROMPT)
+
+
+class State(TypedDict):
+    question: str
+    kind: str
+    query_result: str
+    web_result: str
+    answer: str
+
+
+async def classify(state: State):
+    response = await classify_agent.ainvoke({"messages": [("human", state["question"])]})
+    question = response["structured_response"]
+    if question is None:
+        question = await llm.with_structured_output(Question).ainvoke(response["messages"])
+    return {"kind": question.kind}
+
+
+def route(state: State):
+    if state["kind"] == "non_sql":
+        return "reject"
+    if state["kind"] == "data":
+        return "data_agent"
+    return ["query_agent", "web_agent"]
+
+
+def reject(state: State):
+    return {"answer": "I can only answer SQL questions and questions about the data in the database."}
+
+
+async def data_agent(state: State):
+    response = await sql_agent.ainvoke({"messages": [("human", state["question"])]})
+    return {"answer": response["messages"][-1].content}
+
+
+async def query_agent(state: State):
+    response = await sql_agent.ainvoke(
+        {"messages": [("human", f"Write and run an example query on a table in the database for: {state['question']}")]}
+    )
+    return {"query_result": response["messages"][-1].content}
+
+
+async def web_agent(state: State):
+    mcp_tools = await mcp_client.get_tools()
+    agent = create_agent(model=llm, tools=mcp_tools, system_prompt=WEB_PROMPT)
+    response = await agent.ainvoke({"messages": [("human", state["question"])]})
+    return {"web_result": response["messages"][-1].content}
+
+
+async def combine(state: State):
+    response = await llm.ainvoke(
+        f"Question: {state['question']}\n"
+        f"From the docs: {state['web_result']}\n"
+        f"Example query on the database: {state['query_result']}\n"
+        "Answer the question. Explain the SQL from the docs, and show the example query and its result."
+    )
+    return {"answer": response.content}
+
+
+def build_graph():
+    graph = StateGraph(State)
+    graph.add_node("classify", classify)
+    graph.add_node("reject", reject)
+    graph.add_node("data_agent", data_agent)
+    graph.add_node("query_agent", query_agent)
+    graph.add_node("web_agent", web_agent)
+    graph.add_node("combine", combine)
+
+    graph.add_edge(START, "classify")
+    graph.add_conditional_edges("classify", route, ["reject", "data_agent", "query_agent", "web_agent"])
+    graph.add_edge("reject", END)
+    graph.add_edge("data_agent", END)
+    graph.add_edge(["query_agent", "web_agent"], "combine")
+    graph.add_edge("combine", END)
+
+    return graph.compile()
+
+
+async def main():
+    workflow = build_graph()
+    for question in [
+        "What is the weather in Delhi?",
+        "How much did each customer spend?",
+        "How do I get a running total in Postgres?",
+    ]:
+        result = await workflow.ainvoke({"question": question})
+        print(question)
+        print(result["answer"])
+        print()
+
+
+asyncio.run(main())
+```
+
+- `classify_agent`: queries `information_schema` to find if the database has the data, and returns a `Question`. `kind` picks the next node.
+- `graph.add_conditional_edges("classify", route, ...)`: the router. `route` reads `kind` and returns the name of the next node.
+- `return ["query_agent", "web_agent"]`: the parallelizer. For a `generic` question, LangGraph runs both agents at the same time.
+- `graph.add_edge(["query_agent", "web_agent"], "combine")`: `combine` waits for both agents.
+- `sql_agent`: one agent that `data_agent` and `query_agent` both use, with a different message.
+- `reject` does not call the LLM.
+
+
+## What's Next
+
+In Part 1, we designed the Support Agent and understood the building blocks of an AI Agent:
+
+- Calling the LLM API
+- Tool Calls, with local Tools and with MCP
+- Creating an Agent
+- Structured Output
+- Creating a Workflow that orchestrates multiple agents
+
+In the upcoming parts, we will use these building blocks to create a production level Support Agent with:
+
+- A Webhook that starts the Agent when a new issue is created on Github
+- Evals to measure how well the Agent resolves the issues
+- Observability to see what the Agent does on every run
+- Deploying the Agent in production
