@@ -1521,17 +1521,16 @@ VENV_DIR = SQLFLUFF_DIR / ".venv" / "bin"
 
 
 async def apply_patch(cwd: Path, patch: str):
-    """Apply a patch in a Sandbox. Return True if it applies, else False.
+    """Apply a patch in a Sandbox.
 
     cwd: the folder of the Sandbox
-    patch: the diff to apply, e.g., the Agent's fix or the real tests. An empty patch returns True.
+    patch: the diff to apply, e.g., the Agent's fix or the real tests. An empty patch does nothing.
 
     Runs: cd <cwd> && git apply - < <patch>
     """
     if not patch.strip():
-        return True
-    code, _ = await run_command(cmd="git apply -", cwd=cwd, stdin=patch)
-    return code == 0
+        return
+    await run_command(cmd="git apply -", cwd=cwd, stdin=patch)
 
 
 async def run_tests(cwd: Path, test_command: str):
@@ -1550,7 +1549,6 @@ async def apply_patches_and_run_tests(base_commit, fix_patch, test_patch, test_c
     """Create a clean Sandbox, add the fix and the tests to it, and run the tests.
 
     Return True if all the tests pass, and the pytest output.
-    If a patch does not apply, return False and the name of the patch that failed.
 
     base_commit: the commit before the real fix, from the Issue metadata
     fix_patch: the code change to test, e.g., the Agent's fix or the real fix
@@ -1558,10 +1556,8 @@ async def apply_patches_and_run_tests(base_commit, fix_patch, test_patch, test_c
     test_command: the pytest command from meta.json
     """
     async with sandbox(base_commit, f"grade-{uuid.uuid4()}") as sandbox_dir:
-        if not await apply_patch(sandbox_dir, fix_patch):
-            return False, "The fix patch does not apply"
-        if not await apply_patch(sandbox_dir, test_patch):
-            return False, "The test patch does not apply"
+        await apply_patch(sandbox_dir, fix_patch)
+        await apply_patch(sandbox_dir, test_patch)
         return await run_tests(sandbox_dir, test_command)
 
 
