@@ -19,7 +19,7 @@ sources:
     url: "https://langfuse.com/docs"
 ---
 
-## Why we need AI Agents?
+## Deterministic Systems
 
 Before LLMs, the systems that we built were deterministic.  
 For a given set of inputs and actions the user performs on the system, there is an expected set of outcomes and behaviour of the system.  
@@ -39,6 +39,8 @@ API request runs a Database Query to send back results
 <img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/deterministic-system.dark.png" alt="Input 1 and Input 2 go into a Deterministic System, which gives Output 1 and Output 2." />
 </figure>
 
+## How LLMs Work
+
 LLMs are probabilistic, i.e., for the same input you won't always get the same output.
 
 The user sends a text query, which is converted to tokens. The LLM is trained on a vast set of data, and it uses this training to give each possible next token a probability.
@@ -54,79 +56,6 @@ The LLM picks one token based on these probabilities, so the same query can give
 </figure>
 
 This continues until the LLM outputs an end token. The tokens are then converted to text and sent back to the user.
-
-Some tasks are not completely deterministic in nature. They are open ended and need someone to understand the problem, plan the steps, make judgements, and perform actions using various deterministic systems. These tasks have always needed humans.
-
-LLMs can now do the understanding, planning and judgement. But an LLM only outputs text. It cannot perform actions on the systems by itself.
-
-An AI Agent uses an LLM enhanced with augmentations of deterministic systems, such as tools, retrieval and memory, to automate such tasks. The LLM decides the next step. The deterministic system performs the step and returns the result. The LLM reads the result and decides the next step, until the task is complete.
-
-<figure class="diagram">
-<img class="theme-light-only" src="/images/posts/build-an-ai-agent-from-scratch/ai-agent.light.png" alt="A Task goes into the AI Agent, which gives an Outcome. The AI Agent sends calls to Tools and gets responses, and sends queries to the LLM and gets answers." />
-<img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/ai-agent.dark.png" alt="A Task goes into the AI Agent, which gives an Outcome. The AI Agent sends calls to Tools and gets responses, and sends queries to the LLM and gets answers." />
-</figure>
-
-## Designing the AI Agent
-
-### Picking a use case
-
-Let's take an Open Source SQL Linter  named [sqlfluff](https://github.com/sqlfluff/sqlfluff) and build a Support Agent that does the following:
-- When a new Github Issue is created on the repository, the Agent picks up the issue.
-- Triage the issue, resolve it and raise a PR having the fix.
-- Write all teh details of the fix in the PR description and link it back to the issue.
-
-<figure class="diagram">
-<img class="theme-light-only" src="/images/posts/build-an-ai-agent-from-scratch/support-agent.light.png" alt="Task: a sqlfluff GH Issue goes into the Support Agent. Outcome: a Fix PR." />
-<img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/support-agent.dark.png" alt="Task: a sqlfluff GH Issue goes into the Support Agent. Outcome: a Fix PR." />
-</figure>
-
-Any developer with the understanding of how SQL linters work and with a modern Coding Agent like Claude Code/Codex can handle such issues with ease as this is a simple use case for Coding Agents.
-
-But in our article, we have used a simple use case to actually give an understanding of approaches to take for building such Support Agents to handle complex codebase and use cases.
-The goal is to also automate the Issue -> PR end-to-end without any human in the loop (HITL)
-
-### Support Agent Requirements
-
-1. The Support Agent should pick up the issue when it is created in Github and start working on it.
-2. The Agent will reproduce the issue as described in the issue description and report the steps performed and results in the issue comment.
-3. The Agent will then write failing tests as per the issue reproduced.
-4. The Agent will fix the issue and run the tests. In a loop work on the fix till the tests pass. 
-5. A review step that will check the validity of tests and the fix against the original issue. Run the entire test suite
-6. Repeat steps 3 - 5 till the outcome is achieved
-7. Raise a PR of the fix and the tests, add the details of all the performed steps and results, link the PR to the issue.
-
-We have established that you need AI Agents when tasks are open ended. Yet you can see that from the requirements it looks like there is a fixed predictable path.  
-
-That is true, the issues are open ended, but when it comes to coding, there are some fixed steps - Software Development Lifecycle (SDLC).  
-
-We can delegate to the Support Agent on what actions to take in the SDLC steps.
-
-### High Level Design
-
-We need an automated process where as soon as the Issue is created on Github, the Agent picks up the Issue and starts working on the Task as per the Issue description. So first step to create a webhook such that GitHub sends an event to our system every time a new issue is opened on the repository.
-
-This is an ideal situation where a Task can be decomposed into fixed SubTasks.
-
-Each SubTask will use LLM calls augmented by Tools to achieve parts of the outcome:
-
-- Setup: Checkout the codebase in a Sandbox environment. Tools - git, files
-- Reproduce: Understand the requirement and SQL dialect. Reproduce the issue on the real Database environment as per the dialect. Tools - sqlfluff, Database calls, Web Search where environment is not available.
-- Plan: Find the root cause in the codebase and plan the fix. Tools - code search, files, git log
-- Write Tests: Write tests that fail because of the issue. Tools - files, test runner
-- Implement: Change the code until the new tests pass. Tools - files, test runner, sqlfluff
-
-<figure class="diagram">
-<img class="theme-light-only" src="/images/posts/build-an-ai-agent-from-scratch/high-level-design.light.png" alt="A GH Issue (the Task) goes through a Webhook to the Support Agent. The Support Agent runs the Sub-Tasks (Setup, Reproduce, Plan, Write Tests, Implement), which use the LLM and Tools: Git, DB Tools for MySQL, Postgres, Oracle and MSSQL, and Web Search for Snowflake, Databricks and BigQuery. The Sub-Tasks and Review loop. A Sandbox checks out the code, creates branches and worktrees, and runs Docker containers for the databases. Evals and Observability watch the Support Agent. The Support Agent outputs a Fixed PR (the Outcome), which links back to the GH Issue." />
-<img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/high-level-design.dark.png" alt="A GH Issue (the Task) goes through a Webhook to the Support Agent. The Support Agent runs the Sub-Tasks (Setup, Reproduce, Plan, Write Tests, Implement), which use the LLM and Tools: Git, DB Tools for MySQL, Postgres, Oracle and MSSQL, and Web Search for Snowflake, Databricks and BigQuery. The Sub-Tasks and Review loop. A Sandbox checks out the code, creates branches and worktrees, and runs Docker containers for the databases. Evals and Observability watch the Support Agent. The Support Agent outputs a Fixed PR (the Outcome), which links back to the GH Issue." />
-</figure>
-
-Review is the guardrail. Once all the SubTasks complete, it checks whether the Agent actually achieved the outcome: it runs the full test suite, and it validates that both the new tests and the fix match the original ask in the Issue description. Passing tests are not enough if the tests check the wrong thing. Review is an Agent of its own, with its own design, which we will cover later.
-
-When Review passes the fix, the Agent finalises the PR, pushes it to the remote, and links it to the Issue.
-
-Before we deploy the Support Agent, we also need Evals to measure how well it solves issues, and Observability to see what it does on every run. Together they make the Agent production ready. We will cover both later.
-
-## Building the Components
 
 ### Calling the LLM API
 
@@ -185,8 +114,8 @@ There are various ways in which an LLM API can be called using Python:
 Create the project with [uv](https://docs.astral.sh/uv/) and add the dependencies:
 
 ```bash
-uv init support-agent
-cd support-agent
+uv init ai-agent
+cd ai-agent
 uv add langchain langchain-openai python-dotenv
 ```
 
@@ -228,6 +157,19 @@ Output:
 ```
 A SQL linter checks SQL code for syntax errors, style problems and bad practices, so that the code is correct and consistent.
 ```
+
+## How an AI Agent Combines Both
+
+Some tasks are not completely deterministic in nature. They are open ended and need someone to understand the problem, plan the steps, make judgements, and perform actions using various deterministic systems. These tasks have always needed humans.
+
+LLMs can now do the understanding, planning and judgement. But an LLM only outputs text. It cannot perform actions on the systems by itself.
+
+An AI Agent uses an LLM enhanced with augmentations of deterministic systems, such as tools, retrieval and memory, to automate such tasks. The LLM decides the next step. The deterministic system performs the step and returns the result. The LLM reads the result and decides the next step, until the task is complete.
+
+<figure class="diagram">
+<img class="theme-light-only" src="/images/posts/build-an-ai-agent-from-scratch/ai-agent.light.png" alt="A Task goes into the AI Agent, which gives an Outcome. The AI Agent sends calls to Tools and gets responses, and sends queries to the LLM and gets answers." />
+<img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/ai-agent.dark.png" alt="A Task goes into the AI Agent, which gives an Outcome. The AI Agent sends calls to Tools and gets responses, and sends queries to the LLM and gets answers." />
+</figure>
 
 ### Tool Calls in LLM
 
@@ -335,6 +277,15 @@ Last. In ascending order, Postgres puts NULL values last: the query returned [(1
 - The 2nd call sends the full conversation back: the question, the Tool call and the Tool result. The LLM answers from the actual result.
 
 ### Tool Calls using MCP
+
+A Tool can also run on another server.  
+The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) is a standard protocol to host Tools on an MCP server.  
+The Agent uses an MCP client to get the list of Tools from the server and to call them.
+
+<figure class="diagram">
+<img class="theme-light-only" src="/images/posts/build-an-ai-agent-from-scratch/mcp.light.png" alt="The AI Agent sends calls to the MCP Client and gets responses. The MCP Client talks to the MCP Server, which runs Tool 1, Tool 2 and Tool 3." />
+<img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/mcp.dark.png" alt="The AI Agent sends calls to the MCP Client and gets responses. The MCP Client talks to the MCP Server, which runs Tool 1, Tool 2 and Tool 3." />
+</figure>
 
 Add the MCP adapter for LangChain to the project:
 
@@ -534,7 +485,7 @@ asyncio.run(main())
 
 - `recursion_limit`: each Tool call uses 2 steps, one LLM step and one Tool step. The final answer uses 1 more step. With a limit of 10, the agent can make about 4 Tool calls before it raises `GraphRecursionError`.
 
-### Structured Output
+## Structured Output
 
 `create_agent` uses LangGraph to build the loop. One agent can solve one subtask, and we can connect these subtasks together to solve a complex task.
 
@@ -746,7 +697,7 @@ Example structured response:
 - `response_format=ToolStrategy(RegexComparison)`: LangChain gives the LLM the schema as one more Tool. The agent stops when the LLM calls that Tool, and LangChain checks the arguments against the model.
 - `recursion_limit` is 25: the agent runs queries on 2 databases, searches the web, and calls the schema Tool.
 
-### Creating a Workflow
+## Creating a Workflow
 
 In the previous section, one agent solved one subtask and returned a Structured Output. With LangGraph, we can orchestrate multiple agents in one workflow, where the output of one agent decides which agent runs next.
 
@@ -970,15 +921,11 @@ asyncio.run(main())
 - `reject` does not call the LLM.
 
 
-## Evals and Observability
-
-In order to know that the AI Agent is production ready, you'll need good evaluations.  
-
-Consider this like writing tests for your AI Agent that the Agent has to pass before any change goes to production, but evals are more complex than writing tests.  
+## Observability
 
 Once the AI Agent is deployed, you'll also need to monitor how the Agent is behaving in production. For this you'll need to add Observability.
 
-Several frameworks can help you implement both - evals and observability. We'll use an open-source framework - [LangFuse](https://langfuse.com/) in our case.
+Several frameworks can help you add observability. We'll use an open-source framework - [LangFuse](https://langfuse.com/) in our case.
 
 LangFuse can run locally with Docker Compose. Clone the repository:
 
@@ -1015,6 +962,115 @@ Add the LangFuse SDK to the project:
 ```bash
 uv add langfuse
 ```
+
+Pass the LangFuse `CallbackHandler` to the Workflow:
+
+```python
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
+
+
+async def main():
+    workflow = build_graph()
+    langfuse_handler = CallbackHandler()
+    for question in [
+        "What is the weather in Delhi?",
+        "How much did each customer spend?",
+        "How do I get a running total in Postgres?",
+    ]:
+        result = await workflow.ainvoke(
+            {"question": question},
+            config={"callbacks": [langfuse_handler]},
+        )
+        print(question)
+        print(result["answer"])
+        print()
+
+    get_client().shutdown()
+```
+
+Each question becomes one trace in LangFuse.  
+Open the LangFuse UI at http://localhost:3000.  
+Open **Tracing**, set the filter **Is Root Observation** to **True**, and click a question to see:
+- The tree of steps: `classify`, `query_agent`, `web_agent` and `combine`, with their LLM calls and tool calls.
+- The timeline: `query_agent` and `web_agent` run at the same time.
+- Each LLM call: input, output, model, tokens, cost and latency.
+- Each tool call: arguments and result.
+- Errors in red.
+
+<figure class="diagram">
+<img class="theme-light-only" src="/images/posts/build-an-ai-agent-from-scratch/langfuse-trace.light.png" alt="LangFuse trace of the question How do I get a running total in Postgres?: the graph shows __start__, classify, model, tools, web_agent, query_agent, combine and __end__, and the side panel shows the input and the output of the run." />
+<img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/langfuse-trace.dark.png" alt="LangFuse trace of the question How do I get a running total in Postgres?: the graph shows __start__, classify, model, tools, web_agent, query_agent, combine and __end__, and the side panel shows the input and the output of the run." />
+</figure>
+
+This shows which step is slow, which step costs the most, and where a wrong answer started.
+
+## Designing the AI Agent
+
+### Picking a use case
+
+Let's take an Open Source SQL Linter  named [sqlfluff](https://github.com/sqlfluff/sqlfluff) and build a Support Agent that does the following:
+- When a new Github Issue is created on the repository, the Agent picks up the issue.
+- Triage the issue, resolve it and raise a PR having the fix.
+- Write all teh details of the fix in the PR description and link it back to the issue.
+
+<figure class="diagram">
+<img class="theme-light-only" src="/images/posts/build-an-ai-agent-from-scratch/support-agent.light.png" alt="Task: a sqlfluff GH Issue goes into the Support Agent. Outcome: a Fix PR." />
+<img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/support-agent.dark.png" alt="Task: a sqlfluff GH Issue goes into the Support Agent. Outcome: a Fix PR." />
+</figure>
+
+Any developer with the understanding of how SQL linters work and with a modern Coding Agent like Claude Code/Codex can handle such issues with ease as this is a simple use case for Coding Agents.
+
+But in our article, we have used a simple use case to actually give an understanding of approaches to take for building such Support Agents to handle complex codebase and use cases.
+The goal is to also automate the Issue -> PR end-to-end without any human in the loop (HITL)
+
+### Support Agent Requirements
+
+1. The Support Agent should pick up the issue when it is created in Github and start working on it.
+2. The Agent will reproduce the issue as described in the issue description and report the steps performed and results in the issue comment.
+3. The Agent will then write failing tests as per the issue reproduced.
+4. The Agent will fix the issue and run the tests. In a loop work on the fix till the tests pass. 
+5. A review step that will check the validity of tests and the fix against the original issue. Run the entire test suite
+6. Repeat steps 3 - 5 till the outcome is achieved
+7. Raise a PR of the fix and the tests, add the details of all the performed steps and results, link the PR to the issue.
+
+We have established that you need AI Agents when tasks are open ended. Yet you can see that from the requirements it looks like there is a fixed predictable path.  
+
+That is true, the issues are open ended, but when it comes to coding, there are some fixed steps - Software Development Lifecycle (SDLC).  
+
+We can delegate to the Support Agent on what actions to take in the SDLC steps.
+
+### High Level Design
+
+We need an automated process where as soon as the Issue is created on Github, the Agent picks up the Issue and starts working on the Task as per the Issue description. So first step to create a webhook such that GitHub sends an event to our system every time a new issue is opened on the repository.
+
+This is an ideal situation where a Task can be decomposed into fixed SubTasks.
+
+Each SubTask will use LLM calls augmented by Tools to achieve parts of the outcome:
+
+- Setup: Checkout the codebase in a Sandbox environment. Tools - git, files
+- Reproduce: Understand the requirement and SQL dialect. Reproduce the issue on the real Database environment as per the dialect. Tools - sqlfluff, Database calls, Web Search where environment is not available.
+- Plan: Find the root cause in the codebase and plan the fix. Tools - code search, files, git log
+- Write Tests: Write tests that fail because of the issue. Tools - files, test runner
+- Implement: Change the code until the new tests pass. Tools - files, test runner, sqlfluff
+
+<figure class="diagram">
+<img class="theme-light-only" src="/images/posts/build-an-ai-agent-from-scratch/high-level-design.light.png" alt="A GH Issue (the Task) goes through a Webhook to the Support Agent. The Support Agent runs the Sub-Tasks (Setup, Reproduce, Plan, Write Tests, Implement), which use the LLM and Tools: Git, DB Tools for MySQL, Postgres, Oracle and MSSQL, and Web Search for Snowflake, Databricks and BigQuery. The Sub-Tasks and Review loop. A Sandbox checks out the code, creates branches and worktrees, and runs Docker containers for the databases. Evals and Observability watch the Support Agent. The Support Agent outputs a Fixed PR (the Outcome), which links back to the GH Issue." />
+<img class="theme-dark-only" src="/images/posts/build-an-ai-agent-from-scratch/high-level-design.dark.png" alt="A GH Issue (the Task) goes through a Webhook to the Support Agent. The Support Agent runs the Sub-Tasks (Setup, Reproduce, Plan, Write Tests, Implement), which use the LLM and Tools: Git, DB Tools for MySQL, Postgres, Oracle and MSSQL, and Web Search for Snowflake, Databricks and BigQuery. The Sub-Tasks and Review loop. A Sandbox checks out the code, creates branches and worktrees, and runs Docker containers for the databases. Evals and Observability watch the Support Agent. The Support Agent outputs a Fixed PR (the Outcome), which links back to the GH Issue." />
+</figure>
+
+Review is the guardrail. Once all the SubTasks complete, it checks whether the Agent actually achieved the outcome: it runs the full test suite, and it validates that both the new tests and the fix match the original ask in the Issue description. Passing tests are not enough if the tests check the wrong thing. Review is an Agent of its own, with its own design, which we will cover later.
+
+When Review passes the fix, the Agent finalises the PR, pushes it to the remote, and links it to the Issue.
+
+Before we deploy the Support Agent, we also need Evals to measure how well it solves issues, and Observability to see what it does on every run. Together they make the Agent production ready. We will cover both later.
+
+## Evaluating the AI Agent
+
+In order to know that the AI Agent is production ready, you'll need good evaluations.  
+
+Consider this like writing tests for your AI Agent that the Agent has to pass before any change goes to production, but evals are more complex than writing tests.  
+
 
 ### Eval Dataset Strategy
 
@@ -1172,8 +1228,8 @@ Each Task in the Eval Dataset needs the data that the Graders above use:
 |---|---|
 | `issue.md` | The Issue title, body and comments |
 | `meta.json` | The base commit, the fix PR and the details of the Issue |
-| `gold.patch` | The source part of the real fix |
-| `test.patch` | The test part of the real fix |
+| `gold_fix.patch` | The source part of the real fix |
+| `gold_test.patch` | The test part of the real fix |
 
 The Eval Dataset has one folder per Issue:
 
@@ -1186,8 +1242,8 @@ eval_data/
 └── 7948/
     ├── issue.md
     ├── meta.json
-    ├── gold.patch
-    └── test.patch
+    ├── gold_fix.patch
+    └── gold_test.patch
 ```
 
 To prepare each Task:
@@ -1195,7 +1251,7 @@ To prepare each Task:
 1. Fetch the closed Issues created from April 2026, i.e., the Unknown Set.
 2. Find the merged PR that closed the Issue. Issue #7948 was closed by PR [#7951](https://github.com/sqlfluff/sqlfluff/pull/7951).
 3. Take the base commit of that PR. This is the commit on `main` before the real fix was merged.
-4. Split the PR diff into 2 patches with the SWE-bench path rule. A file with `test/`, `tests/`, `e2e/` or `testing/` in its path goes to `test.patch`. All other files go to `gold.patch`.
+4. Split the PR diff into 2 patches with the SWE-bench path rule. A file with `test/`, `tests/`, `e2e/` or `testing/` in its path goes to `gold_test.patch`. All other files go to `gold_fix.patch`.
 5. Save the Issue and its comments to `issue.md`.
 6. Save the details of the Issue to `meta.json`.
 
@@ -1225,7 +1281,7 @@ The `meta.json` for Issue #7948 (trimmed):
 }
 ```
 
-The `gold.patch` for Issue #7948:
+The `gold_fix.patch` for Issue #7948:
 
 ```diff
 --- a/src/sqlfluff/dialects/dialect_databricks.py
@@ -1241,7 +1297,7 @@ The `gold.patch` for Issue #7948:
          Ref("TableReferenceSegment"),
 ```
 
-The `test.patch` for Issue #7948:
+The `gold_test.patch` for Issue #7948:
 
 ```diff
 --- a/test/fixtures/dialects/databricks/create_view.sql
@@ -1315,7 +1371,7 @@ We are taking these 5 Issues for the Eval Dataset:
 
 Each Issue becomes one dataset item:
 - `input`: the text of `issue.md`. This is the input task to the Agent.
-- `expected_output`: `gold.patch` and `test.patch`, i.e., the real fix and the real tests.
+- `expected_output`: `gold_fix.patch` and `gold_test.patch`, i.e., the real fix and the real tests.
 - `metadata`: the base commit, the Issue number and the dialect.
 
 ```python
@@ -1323,7 +1379,7 @@ import json
 from pathlib import Path
 
 from dotenv import load_dotenv
-from langfuse import get_client
+from langfuse._client.get_client import get_client
 
 load_dotenv()
 
@@ -1334,27 +1390,31 @@ ISSUES = [7948, 7769, 7957, 7753, 7746]
 
 langfuse.create_dataset(
     name=DATASET_NAME,
-    description="5 simple sqlfluff Issues for Eval-Driven Development",
+    description="Sample sqlfluff dataset for agent evaluation"
 )
 
 for issue_id in ISSUES:
-    task_dir = Path("eval_data") / str(issue_id)
-    meta = json.loads((task_dir / "meta.json").read_text())
+    task_dir = Path("data") / "eval_candidates" / str(issue_id)
+    metadata_path = task_dir / "meta.json"
+    metadata = json.loads(metadata_path.read_text())
+    issue_description = (task_dir / "issue.md").read_text()
+    gold_fix_patch = (task_dir / "gold_fix.patch").read_text()
+    gold_test_patch = (task_dir / "gold_test.patch").read_text()
 
     langfuse.create_dataset_item(
         dataset_name=DATASET_NAME,
         id=f"sqlfluff-{issue_id}",
-        input=(task_dir / "issue.md").read_text(),
+        input=issue_description,
         expected_output={
-            "gold_patch": (task_dir / "gold.patch").read_text(),
-            "test_patch": (task_dir / "test.patch").read_text(),
+            "gold_fix_patch": gold_fix_patch,
+            "gold_test_patch": gold_test_patch
         },
         metadata={
             "issue_id": issue_id,
-            "base_commit": meta["base_commit"],
-            "dialect": meta["dialects"][0],
-            "test_command": meta["test_command"],
-        },
+            "base_commit": metadata["base_commit"],
+            "dialect": metadata["dialects"][0],
+            "test_command": metadata["test_command"]
+        }
     )
 ```
 
@@ -1372,7 +1432,7 @@ Clone sqlfluff once and install only its dependencies:
 git clone https://github.com/sqlfluff/sqlfluff.git
 cd sqlfluff
 uv venv
-uv pip install -r pyproject.toml -r requirements_dev.txt
+uv pip install -e . -r requirements_dev.txt
 ```
 
 ```python
@@ -1381,35 +1441,41 @@ from asyncio.subprocess import PIPE, STDOUT
 from contextlib import asynccontextmanager
 
 SQLFLUFF_DIR = Path("sqlfluff").resolve()
-SANDBOXES_DIR = Path("sandboxes").resolve()
-PYTEST_DIR = SQLFLUFF_DIR / ".venv/bin"
+SANDBOX_DIR = Path("sandbox").resolve()
 
 
-async def run(cmd: str, cwd: Path, stdin: str | None = None) -> tuple[int, str]:
+async def run_command(cmd: str, cwd: Path, stdin: str | None = None):
     """Run a shell command in a folder. Return the exit code and the output.
 
+    cmd: the shell command to run
+    cwd: the folder to run the command in
+    stdin: the text to send to the command as input, e.g., a patch for git apply
+
     Example:
-        await run("git diff -- src", repo_dir)  # the changes the Agent made to the source code
+        await run_command(cmd="git diff -- src", cwd=sandbox_dir)  # the changes the Agent made to the source code
     """
-    proc = await asyncio.create_subprocess_shell(cmd, cwd=cwd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
-    output, _ = await proc.communicate(stdin.encode() if stdin else None)
-    return proc.returncode, output.decode()
+    sub_process = await asyncio.create_subprocess_shell(cmd, cwd=cwd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+    output, _ = await sub_process.communicate(stdin.encode() if stdin else None)
+    return sub_process.returncode, output.decode()
 
 
 @asynccontextmanager
-async def sandbox(base_commit: str, name: str):
+async def sandbox(base_commit: str, sandbox_id: str):
     """Create a Sandbox of sqlfluff at the base commit, and remove it at the end.
 
+    base_commit: the commit before the real fix, from the Issue metadata
+    sandbox_id: the folder name of the Sandbox, e.g., 7948-agent
+
     sqlfluff/              # the main clone
-    sandboxes/
-        7948-agent/        # repo_dir: the git worktree at the base commit of Issue #7948
+    sandbox/
+        7948-agent/        # worktree_dir: the git worktree at the base commit of Issue #7948
     """
-    repo_dir = SANDBOXES_DIR / name
-    await run(f"git worktree add --detach {repo_dir} {base_commit}", SQLFLUFF_DIR)
+    worktree_dir = SANDBOX_DIR / sandbox_id
+    await run_command(cmd=f"git worktree add --detach {worktree_dir} {base_commit}", cwd=SQLFLUFF_DIR)
     try:
-        yield repo_dir
+        yield worktree_dir
     finally:
-        await run(f"git worktree remove --force {repo_dir}", SQLFLUFF_DIR)
+        await run_command(cmd=f"git worktree remove --force {worktree_dir}", cwd=SQLFLUFF_DIR)
 ```
 
 #### 4. Create the empty Agent
@@ -1419,12 +1485,12 @@ We use an empty Agent to run the evals, and implement it later.
 ```python
 from typing import TypedDict
 
-from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import END, START, StateGraph
 
 
 class State(TypedDict):
     issue: str
-    repo_dir: str
+    sandbox_dir: str
     fix_patch: str
     test_patch: str
 
@@ -1444,41 +1510,43 @@ support_agent = graph.compile()
 #### 5. Write the first Grader
 
 We start with Check 2: Agent's fix + real tests.  
-It runs the dialect tests of the fixture files in `test.patch`, e.g., `pytest test/dialects/dialects_test.py -k "databricks-create_view.sql"`.
+It runs the dialect tests of the fixture files in `gold_test.patch`, e.g., `pytest test/dialects/dialects_test.py -k "databricks-create_view.sql"`.
 
 ```python
 import uuid
 
 from langfuse import Evaluation
 
+VENV_DIR = SQLFLUFF_DIR / ".venv" / "bin"
 
-async def apply_patch(repo_dir: Path, patch: str) -> bool:
+
+async def apply_patch(cwd: Path, patch: str):
     """Apply a patch in a Sandbox. Return True if it applies, else False.
 
-    repo_dir: the folder of the Sandbox
+    cwd: the folder of the Sandbox
     patch: the diff to apply, e.g., the Agent's fix or the real tests. An empty patch returns True.
 
-    Runs: cd <repo_dir> && git apply - < <patch>
+    Runs: cd <cwd> && git apply - < <patch>
     """
     if not patch.strip():
         return True
-    code, _ = await run("git apply -", repo_dir, stdin=patch)
+    code, _ = await run_command(cmd="git apply -", cwd=cwd, stdin=patch)
     return code == 0
 
 
-async def run_tests(repo_dir: Path, test_command: str) -> tuple[bool, str]:
+async def run_tests(cwd: Path, test_command: str):
     """Run the test command in a Sandbox, with the sqlfluff code of the Sandbox.
 
     Return True if all the tests pass, and the pytest output.
 
-    repo_dir: the folder of the Sandbox
+    cwd: the folder of the Sandbox
     test_command: the test command from meta.json, e.g., pytest test/dialects/dialects_test.py -k '...'
     """
-    code, output = await run(f"PYTHONPATH=src {PYTEST_DIR}/{test_command}", repo_dir)
+    code, output = await run_command(cmd=f"PYTHONPATH=src {VENV_DIR}/{test_command}", cwd=cwd)
     return code == 0, output
 
 
-async def apply_fix_and_run_tests(base_commit: str, fix_patch: str, test_patch: str, test_command: str) -> tuple[bool, str]:
+async def apply_patches_and_run_tests(base_commit, fix_patch, test_patch, test_command):
     """Create a clean Sandbox, add the fix and the tests to it, and run the tests.
 
     Return True if all the tests pass, and the pytest output.
@@ -1489,29 +1557,35 @@ async def apply_fix_and_run_tests(base_commit: str, fix_patch: str, test_patch: 
     test_patch: the tests to run, e.g., the real tests or the Agent's tests
     test_command: the pytest command from meta.json
     """
-    async with sandbox(base_commit, f"grade-{uuid.uuid4().hex[:8]}") as repo_dir:
-        if not await apply_patch(repo_dir, fix_patch):
+    async with sandbox(base_commit, f"grade-{uuid.uuid4()}") as sandbox_dir:
+        if not await apply_patch(sandbox_dir, fix_patch):
             return False, "The fix patch does not apply"
-        if not await apply_patch(repo_dir, test_patch):
+        if not await apply_patch(sandbox_dir, test_patch):
             return False, "The test patch does not apply"
-        return await run_tests(repo_dir, test_command)
+        return await run_tests(sandbox_dir, test_command)
 
 
-async def agent_fix_with_real_tests(*, input, output, expected_output, metadata, **kwargs):
+async def agent_fix_gold_test_evaluator(input, output, expected_output, metadata):
     """Grade the Agent: run the real tests on the Agent's fix.
 
     Return a score of 1 if all the tests pass, else 0, with the pytest output as the comment.
     LangFuse calls this function for each Issue and saves the score.
+    LangFuse calls each evaluator with input, output, expected_output and metadata, so the evaluator needs all 4 arguments.
 
     input: the Issue text (not used here)
     output: what the Agent returned, i.e., fix_patch and test_patch
-    expected_output: the real fix and the real tests, i.e., gold_patch and test_patch
+    expected_output: the real fix and the real tests, i.e., gold_fix_patch and gold_test_patch
     metadata: the Issue details, i.e., issue_id, base_commit, dialect and test_command
     """
-    passed, summary = await apply_fix_and_run_tests(
-        metadata["base_commit"], output["fix_patch"], expected_output["test_patch"], metadata["test_command"],
+    base_commit = metadata["base_commit"]
+    agent_fix_patch = output["fix_patch"]
+    gold_test_patch = expected_output["gold_test_patch"]
+    test_command = metadata["test_command"]
+
+    passed, test_run_summary = await apply_patches_and_run_tests(
+        base_commit, agent_fix_patch, gold_test_patch, test_command
     )
-    return Evaluation(name="agent_fix_with_real_tests", value=1 if passed else 0, comment=summary)
+    return Evaluation(name="agent_fix_gold_test_evaluator", value=1 if passed else 0, comment=test_run_summary)
 ```
 
 The other checks reuse `apply_fix_and_run_tests` with other patch combinations.
@@ -1521,37 +1595,59 @@ The other checks reuse `apply_fix_and_run_tests` with other patch combinations.
 `run_experiment` runs the Agent on each item, grades the output and saves the scores in LangFuse.
 
 ```python
-async def run_support_agent(*, item, **kwargs):
-    issue_id = item.metadata["issue_id"]
-    async with sandbox(item.metadata["base_commit"], f"{issue_id}-agent") as repo_dir:
-        response = await support_agent.ainvoke({"issue": item.input, "repo_dir": str(repo_dir)})
-        return {"fix_patch": response["fix_patch"], "test_patch": response["test_patch"]}
+async def run_support_agent(item):
+    """Run the Agent on one Issue in its own Sandbox. Return the Agent's fix and tests.
+
+    LangFuse calls this function for each dataset item, with the item as the argument.
+
+    item: the dataset item, i.e., input (the Issue text) and metadata (issue_id, base_commit, dialect and test_command)
+    """
+    metadata = item.metadata
+    issue_id = metadata["issue_id"]
+    base_commit = metadata["base_commit"]
+    input = item.input
+
+    async with sandbox(base_commit, f"{issue_id}-agent") as sandbox_dir:
+        response = await support_agent.ainvoke({
+            "issue": input,
+            "sandbox_dir": str(sandbox_dir)
+        })
+        return {
+            "fix_patch": response["fix_patch"],
+            "test_patch": response["test_patch"],
+        }
 
 
-dataset = langfuse.get_dataset(DATASET_NAME)
+eval_dataset = langfuse.get_dataset(DATASET_NAME)
 
-result = dataset.run_experiment(
+result = eval_dataset.run_experiment(
     name="Empty Agent",
-    description="Baseline: the Agent returns no fix",
+    description="Running Failing Evals",
     task=run_support_agent,
-    evaluators=[agent_fix_with_real_tests],
-    max_concurrency=5,
+    evaluators=[agent_fix_gold_test_evaluator]
 )
 
 for item_result in result.item_results:
     for evaluation in item_result.evaluations:
-        print(item_result.item.metadata["issue_id"], evaluation.value, evaluation.comment)
+        print("Issue ID:", item_result.item.metadata["issue_id"])
+        print("Status:", "Passed" if evaluation.value else "Failed")
+        print("Test Command:", item_result.item.metadata["test_command"])
+        print("Test Summary:", evaluation.comment)
 
 langfuse.flush()
 ```
 
 Each Task has its own Sandbox, so all 5 run in parallel.
 
-#### 7. The Baseline
+#### 7. Check the Eval Results
+
+1. Open the LangFuse UI at http://localhost:3000.
+2. Open **Experiments**.
+3. Click the run **Empty Agent** to see the score of each Issue.
 
 The empty Agent fixes nothing, so all 5 Tasks fail:
 
-| Issue | Dialect | agent_fix_with_real_tests |
+| Issue | Dialect | agent_fix_gold_test_evaluator |
 |---|---|---|
 | #7948 | databricks | 0 (FAIL) |
 | #7769 | bigquery | 0 (FAIL) |
